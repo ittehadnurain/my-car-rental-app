@@ -78,8 +78,8 @@ const ADMIN_USERS = [
     name: 'প্রথম অ্যাডমিন'
   },
   {
-    email: 'admin2@gmail.com',
-    password: 'Password456',
+    email: '01858050997',
+    password: '01858050997',
     name: 'দ্বিতীয় অ্যাডমিন'
   }
 ];
