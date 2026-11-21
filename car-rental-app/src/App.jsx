@@ -913,7 +913,17 @@ export default function App() {
   }, [rents, gasExpenses]);
 
   const handlePrintReport = () => {
-    window.print();
+    try {
+      if (typeof window !== 'undefined' && typeof window.print === 'function') {
+        window.focus();
+        window.print();
+      } else {
+        showToast('ব্রাউজারের Share বা Menu (⋮) থেকে Print / Save as PDF সিলেক্ট করুন', 'error');
+      }
+    } catch (err) {
+      console.error('Print trigger failed:', err);
+      showToast('ব্রাউজারের Share বা Menu (⋮) থেকে Print / Save as PDF সিলেক্ট করুন', 'error');
+    }
   };
 
   const activeDriverObj = drivers.find((d) => d.id === selectedDriverId);
