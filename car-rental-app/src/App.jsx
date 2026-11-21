@@ -143,6 +143,12 @@ const getRentNetAfterCommission = (rent) => {
   return +(gross * 0.75).toFixed(2);
 };
 
+// If approvalStatus is not explicitly set (legacy records), treat as approved
+const getGasApprovalStatus = (gas) => {
+  if (!gas) return 'approved';
+  return gas.approvalStatus || 'approved';
+};
+
 const compressImageToBase64 = (file, maxWidth = 800, quality = 0.65) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -600,7 +606,7 @@ export default function App() {
     }
   };
 
-  // Gas Selection & Paid Status Handlers
+  // Gas Selection, Approval & Paid Status Handlers
   const toggleSelectGas = (id) => {
     setSelectedGasIds((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
@@ -615,6 +621,60 @@ export default function App() {
       setSelectedGasIds((prev) => prev.filter((id) => !visibleIds.includes(id)));
     } else {
       setSelectedGasIds((prev) => Array.from(new Set([...prev, ...visibleIds])));
+    }
+  };
+
+  const handleGasApprovalChange = async (targetIds, nextStatus) => {
+    if (currentUser?.role !== 'admin') {
+      showToast('শুধুমাত্র অ্যাডমিন গ্যাস খরচ অনুমোদন করতে পারবেন', 'error');
+      return;
+    }
+    const idsArray = Array.isArray(targetIds) ? targetIds : [targetIds];
+    if (idsArray.length === 0) {
+      showToast('আগে অন্তত একটি গ্যাস খরচ সিলেক্ট করুন', 'error');
+      return;
+    }
+
+    const updatedFields = {
+      approvalStatus: nextStatus,
+      approvedAt: nextStatus === 'approved' ? new Date().toISOString() : null,
+      approvedBy: nextStatus === 'approved' ? currentUser?.name || 'Admin' : null
+    };
+
+    try {
+      for (const gasId of idsArray) {
+        if (isFirebaseReady && db && !String(gasId).startsWith('GAS-')) {
+          await updateDoc(doc(db, 'gas_expenses', gasId), updatedFields);
+        }
+      }
+
+      setGasExpenses((prev) =>
+        prev.map((g) => (idsArray.includes(g.id) ? { ...g, ...updatedFields } : g))
+      );
+
+      const statusLabel =
+        nextStatus === 'approved'
+          ? 'Approved (গ্যাস খরচে যুক্ত)'
+          : nextStatus === 'rejected'
+          ? 'Rejected'
+          : 'Pending';
+
+      await writeAuditLog(
+        `অ্যাডমিন ${idsArray.length}টি গ্যাস খরচ ${statusLabel} করেছেন`,
+        currentUser?.name || 'Admin'
+      );
+
+      setSelectedGasIds((prev) => prev.filter((id) => !idsArray.includes(id)));
+      showToast(
+        nextStatus === 'approved'
+          ? `${idsArray.length}টি গ্যাস খরচ অনুমোদিত হয়ে গ্যাস খরচে যুক্ত হয়েছে!`
+          : nextStatus === 'rejected'
+          ? `${idsArray.length}টি গ্যাস খরচ বাতিল (Rejected) করা হয়েছে`
+          : `${idsArray.length}টি গ্যাস খরচ Pending-এ রাখা হয়েছে`
+      );
+    } catch (err) {
+      console.error(err);
+      showToast('অনুমোদন স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে', 'error');
     }
   };
 
@@ -684,7 +744,7 @@ export default function App() {
     }
   };
 
-  // Submit Gas Expense Entry
+  // Submit Gas Expense Entry (Starts as 'pending' until Admin approves)
   const handleGasSubmit = async (e) => {
     e.preventDefault();
     const targetDriverId = currentUser?.role === 'driver' ? currentUser.driverId : selectedDriverId;
@@ -706,6 +766,7 @@ export default function App() {
     setIsSubmittingGas(true);
     const stationObj = stations.find((s) => s.id === selectedStationId);
     const driverObj = drivers.find((d) => d.id === targetDriverId);
+    const initialApproval = currentUser?.role === 'admin' ? 'approved' : 'pending';
 
     const gasPayload = {
       driverId: targetDriverId,
@@ -716,6 +777,9 @@ export default function App() {
       receiptImage: receiptBase64,
       receiptFileName: receiptFileName || 'receipt.jpg',
       expenseDate: gasDate,
+      approvalStatus: initialApproval,
+      approvedAt: initialApproval === 'approved' ? new Date().toISOString() : null,
+      approvedBy: initialApproval === 'approved' ? currentUser?.name || 'Admin' : null,
       isPaid: false,
       paidAt: null,
       locked: true,
@@ -731,10 +795,16 @@ export default function App() {
         setGasExpenses((prev) => [{ id: 'GAS-' + Date.now(), ...gasPayload }, ...prev]);
       }
       await writeAuditLog(
-        `নতুন গ্যাস খরচ (${targetDriverId}): ${stationObj?.name || ''}, পরিমাণ: ${formatBDT(amountNum)}`,
+        `নতুন গ্যাস খরচ সাবমিট (${targetDriverId}) [${initialApproval.toUpperCase()}]: ${
+          stationObj?.name || ''
+        }, পরিমাণ: ${formatBDT(amountNum)}`,
         currentUser?.name || targetDriverId
       );
-      showToast('গ্যাস খরচের হিসাব ও রিসিপ্ট সংরক্ষিত হয়েছে!');
+      showToast(
+        initialApproval === 'approved'
+          ? 'গ্যাস খরচ অনুমোদিত হয়ে সংরক্ষিত হয়েছে!'
+          : 'গ্যাস খরচ অ্যাডমিনের অনুমোদনের জন্য পাঠানো হয়েছে!'
+      );
       setGasAmount('');
       setReceiptBase64('');
       setReceiptFileName('');
@@ -1002,7 +1072,18 @@ export default function App() {
     setTimeout(() => setCopiedRules(false), 2500);
   };
 
-  // Filtered Rents & Gas Expenses for Summary Report
+  // Only approved gas expenses count towards Gas Expense totals
+  const approvedGasExpenses = useMemo(
+    () => gasExpenses.filter((g) => getGasApprovalStatus(g) === 'approved'),
+    [gasExpenses]
+  );
+
+  const pendingGasCount = useMemo(
+    () => gasExpenses.filter((g) => getGasApprovalStatus(g) === 'pending').length,
+    [gasExpenses]
+  );
+
+  // Filtered Rents & Approved Gas Expenses for Summary Report
   const filteredSummary = useMemo(() => {
     const isAllDrivers = currentUser?.role === 'admin' && reportScope === 'all';
     const targetId = currentUser?.role === 'driver' ? currentUser.driverId : selectedDriverId;
@@ -1019,7 +1100,7 @@ export default function App() {
       return driverMatch && matchDate(r.rentDate);
     });
 
-    const matchingGas = gasExpenses.filter((g) => {
+    const matchingGas = approvedGasExpenses.filter((g) => {
       const driverMatch = isAllDrivers ? true : g.driverId === targetId;
       return driverMatch && matchDate(g.expenseDate);
     });
@@ -1071,14 +1152,14 @@ export default function App() {
       totalGasAmount,
       ownerNetIncome
     };
-  }, [rents, gasExpenses, currentUser, reportScope, selectedDriverId, startDate, endDate]);
+  }, [rents, approvedGasExpenses, currentUser, reportScope, selectedDriverId, startDate, endDate]);
 
-  // Overall Admin Totals (Paid rent after 25% commission minus Paid gas expense)
+  // Overall Admin Totals (Only approved gas expenses count in Gas Expense)
   const overallTotals = useMemo(() => {
     const totalRents = rents.reduce((sum, r) => sum + (Number(r.totalFare) || 0), 0);
     const totalCommission = rents.reduce((sum, r) => sum + (Number(r.driverCommission) || 0), 0);
     const totalOwnerShare = rents.reduce((sum, r) => sum + getRentNetAfterCommission(r), 0);
-    const totalGas = gasExpenses.reduce((sum, g) => sum + (Number(g.amount) || 0), 0);
+    const totalGas = approvedGasExpenses.reduce((sum, g) => sum + (Number(g.amount) || 0), 0);
     const netOwnerProfit = totalOwnerShare - totalGas;
 
     const paidTotalRents = rents
@@ -1088,7 +1169,7 @@ export default function App() {
       .filter((r) => !r.isPaid)
       .reduce((sum, r) => sum + getRentNetAfterCommission(r), 0);
 
-    const paidTotalGas = gasExpenses
+    const paidTotalGas = approvedGasExpenses
       .filter((g) => Boolean(g.isPaid))
       .reduce((sum, g) => sum + (Number(g.amount) || 0), 0);
 
@@ -1105,7 +1186,7 @@ export default function App() {
       paidTotalGas,
       paidNetRentAfterGas
     };
-  }, [rents, gasExpenses]);
+  }, [rents, approvedGasExpenses]);
 
   const selectedRentsTotalAmount = useMemo(() => {
     return rents
@@ -1411,6 +1492,11 @@ export default function App() {
                 >
                   <LayoutDashboard className="w-4 h-4" />
                   মাস্টার অ্যাডমিন প্যানেল
+                  {pendingGasCount > 0 && (
+                    <span className="px-1.5 py-0.5 rounded-full text-[11px] bg-rose-600 text-white font-bold">
+                      {pendingGasCount}
+                    </span>
+                  )}
                 </button>
                 <button
                   type="button"
@@ -1482,7 +1568,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setActiveTab('admin')}
-                className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl text-xs font-bold transition ${
+                className={`relative flex flex-col items-center justify-center py-2 px-1 rounded-xl text-xs font-bold transition ${
                   activeTab === 'admin'
                     ? 'bg-amber-500 text-slate-950'
                     : 'text-slate-300 active:bg-slate-800'
@@ -1490,6 +1576,11 @@ export default function App() {
               >
                 <LayoutDashboard className="w-4 h-4 mb-0.5" />
                 <span>অ্যাডমিন প্যানেল</span>
+                {pendingGasCount > 0 && (
+                  <span className="absolute top-1 right-4 px-1.5 py-0.2 rounded-full text-[10px] bg-rose-600 text-white font-bold">
+                    {pendingGasCount}
+                  </span>
+                )}
               </button>
               <button
                 type="button"
@@ -1762,7 +1853,7 @@ export default function App() {
                   গ্যাস-খরচ ইনপুট
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  তারিখ, গ্যাস স্টেশন, টাকার পরিমাণ ও রিসিপ্টের ছবি দিন
+                  সাবমিট করার পর অ্যাডমিন অনুমোদন করলে এটি গ্যাস খরচে যুক্ত হবে
                 </p>
               </div>
 
@@ -1879,7 +1970,7 @@ export default function App() {
                     className="w-full py-3.5 sm:py-3 px-6 rounded-xl bg-amber-600 hover:bg-amber-700 active:scale-[0.99] disabled:opacity-60 text-white font-bold text-sm sm:text-base shadow-sm transition flex items-center justify-center gap-2"
                   >
                     <Plus className="w-4 h-4" />
-                    <span>{isSubmittingGas ? 'আপলোড হচ্ছে...' : 'গ্যাস খরচ সেভ করুন'}</span>
+                    <span>{isSubmittingGas ? 'আপলোড হচ্ছে...' : 'অনুমোদনের জন্য পাঠান'}</span>
                   </button>
                 </div>
               </form>
@@ -1893,44 +1984,53 @@ export default function App() {
                 {gasExpenses
                   .filter((g) => g.driverId === currentUser.driverId)
                   .slice(0, 8)
-                  .map((g) => (
-                    <div
-                      key={g.id}
-                      className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/80 flex items-center justify-between gap-3"
-                    >
-                      <div className="min-w-0">
-                        <div className="text-xs text-slate-500 flex items-center gap-1.5">
-                          {g.expenseDate}
-                          <Lock className="w-3 h-3 text-slate-400" />
-                          <span
-                            className={`px-2 py-0.5 rounded-full font-semibold ${
-                              g.isPaid
-                                ? 'bg-emerald-100 text-emerald-700'
-                                : 'bg-amber-100 text-amber-800'
-                            }`}
+                  .map((g) => {
+                    const approval = getGasApprovalStatus(g);
+                    return (
+                      <div
+                        key={g.id}
+                        className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/80 flex items-center justify-between gap-3"
+                      >
+                        <div className="min-w-0">
+                          <div className="text-xs text-slate-500 flex flex-wrap items-center gap-1.5">
+                            <span>{g.expenseDate}</span>
+                            <Lock className="w-3 h-3 text-slate-400" />
+                            <span
+                              className={`px-2 py-0.5 rounded-full font-semibold ${
+                                approval === 'approved'
+                                  ? 'bg-emerald-100 text-emerald-700'
+                                  : approval === 'rejected'
+                                  ? 'bg-rose-100 text-rose-700'
+                                  : 'bg-amber-100 text-amber-800'
+                              }`}
+                            >
+                              {approval === 'approved'
+                                ? 'Approved'
+                                : approval === 'rejected'
+                                ? 'Rejected'
+                                : 'Pending'}
+                            </span>
+                          </div>
+                          <div className="font-semibold text-sm text-slate-800 mt-0.5 truncate">
+                            {g.stationName}
+                          </div>
+                          <div className="text-sm font-bold text-amber-700 mt-1">
+                            {formatBDT(g.amount)}
+                          </div>
+                        </div>
+                        {g.receiptImage && (
+                          <button
+                            type="button"
+                            onClick={() => setReceiptModalUrl(g.receiptImage)}
+                            className="px-3 py-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-xs font-semibold text-slate-700 flex items-center gap-1 shrink-0"
                           >
-                            {g.isPaid ? 'Paid' : 'Unpaid'}
-                          </span>
-                        </div>
-                        <div className="font-semibold text-sm text-slate-800 mt-0.5 truncate">
-                          {g.stationName}
-                        </div>
-                        <div className="text-sm font-bold text-amber-700 mt-1">
-                          {formatBDT(g.amount)}
-                        </div>
+                            <Eye className="w-3.5 h-3.5 text-amber-600" />
+                            রিসিপ্ট
+                          </button>
+                        )}
                       </div>
-                      {g.receiptImage && (
-                        <button
-                          type="button"
-                          onClick={() => setReceiptModalUrl(g.receiptImage)}
-                          className="px-3 py-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-xs font-semibold text-slate-700 flex items-center gap-1 shrink-0"
-                        >
-                          <Eye className="w-3.5 h-3.5 text-amber-600" />
-                          রিসিপ্ট
-                        </button>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 {gasExpenses.filter((g) => g.driverId === currentUser.driverId).length === 0 && (
                   <div className="text-center py-8 text-slate-400 text-sm">
                     আপনার এখনো কোনো গ্যাস খরচের রেকর্ড নেই।
@@ -1953,7 +2053,7 @@ export default function App() {
                     {isDriver ? 'আমার সামারি রিপোর্ট' : 'সামারি রিপোর্ট ও PDF প্রিন্ট'}
                   </h2>
                   <p className="text-xs text-slate-500">
-                    ৭, ১০, ১৫, ৩০ দিন বা কাস্টম তারিখে হিসাব দেখুন
+                    ৭, ১০, ১৫, ৩০ দিন বা কাস্টম তারিখে হিসাব দেখুন (শুধুমাত্র Approved গ্যাস খরচ গণনায় আসে)
                   </p>
                 </div>
 
@@ -2084,7 +2184,7 @@ export default function App() {
                 <div className="text-left sm:text-right text-xs text-slate-500">
                   <div>তারিখ: {todayISO()}</div>
                   <div className="font-semibold text-slate-700 mt-0.5">
-                    ট্রিপ: {filteredSummary.matchingRents.length}টি | গ্যাস:{' '}
+                    ট্রিপ: {filteredSummary.matchingRents.length}টি | অনুমোদিত গ্যাস:{' '}
                     {filteredSummary.matchingGas.length}টি
                   </div>
                 </div>
@@ -2277,7 +2377,9 @@ export default function App() {
                 </table>
               </div>
 
-              <h4 className="font-bold text-slate-800 text-sm mb-2.5">গ্যাস খরচের বিস্তারিত</h4>
+              <h4 className="font-bold text-slate-800 text-sm mb-2.5">
+                অনুমোদিত গ্যাস খরচের বিস্তারিত
+              </h4>
               <div className="sm:hidden space-y-2.5">
                 {filteredSummary.matchingGas.map((g) => (
                   <div
@@ -2314,7 +2416,7 @@ export default function App() {
                 ))}
                 {filteredSummary.matchingGas.length === 0 && (
                   <div className="py-5 text-center text-slate-400 text-xs border border-dashed border-slate-200 rounded-xl">
-                    এই সময়কালে কোনো গ্যাস খরচের তথ্য নেই।
+                    এই সময়কালে কোনো অনুমোদিত গ্যাস খরচের তথ্য নেই।
                   </div>
                 )}
               </div>
@@ -2375,7 +2477,7 @@ export default function App() {
                           colSpan={isAdmin && reportScope === 'all' ? 6 : 5}
                           className="py-6 text-center text-slate-400"
                         >
-                          এই সময়কালে কোনো গ্যাস খরচের তথ্য পাওয়া যায়নি।
+                          এই সময়কালে কোনো অনুমোদিত গ্যাস খরচের তথ্য পাওয়া যায়নি।
                         </td>
                       </tr>
                     )}
@@ -2395,7 +2497,11 @@ export default function App() {
               {[
                 { id: 'overview', label: 'ওভারভিউ' },
                 { id: 'rents', label: `ভাড়া (${rents.length})` },
-                { id: 'gas', label: `গ্যাস (${gasExpenses.length})` },
+                {
+                  id: 'gas',
+                  label: `গ্যাস (${gasExpenses.length})`,
+                  badge: pendingGasCount > 0 ? pendingGasCount : null
+                },
                 { id: 'drivers', label: `ড্রাইভার (${drivers.length})` },
                 { id: 'stations', label: `স্টেশন (${stations.length})` },
                 { id: 'security', label: 'ব্যাকআপ ও রুলস' }
@@ -2404,13 +2510,18 @@ export default function App() {
                   key={sub.id}
                   type="button"
                   onClick={() => setAdminSubTab(sub.id)}
-                  className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition ${
+                  className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition flex items-center gap-1.5 ${
                     adminSubTab === sub.id
                       ? 'bg-slate-900 text-white'
                       : 'text-slate-600 hover:bg-slate-100'
                   }`}
                 >
-                  {sub.label}
+                  <span>{sub.label}</span>
+                  {sub.badge && (
+                    <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-rose-600 text-white font-bold">
+                      {sub.badge}
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -2442,7 +2553,8 @@ export default function App() {
                       {formatBDT(overallTotals.totalGas)}
                     </div>
                     <div className="text-[11px] text-amber-700/80 mt-1">
-                      {gasExpenses.length}টি রিসিপ্ট
+                      {approvedGasExpenses.length}টি অনুমোদিত
+                      {pendingGasCount > 0 ? ` • ${pendingGasCount}টি পেন্ডিং` : ''}
                     </div>
                   </div>
 
@@ -2454,7 +2566,7 @@ export default function App() {
                       {formatBDT(overallTotals.netOwnerProfit)}
                     </div>
                     <div className="text-[11px] text-slate-300 mt-1">
-                      ২৫% ও গ্যাস বাদে
+                      ২৫% ও অনুমোদিত গ্যাস বাদে
                     </div>
                   </div>
                 </div>
@@ -2505,7 +2617,7 @@ export default function App() {
                       <div className="sm:hidden space-y-3">
                         {drivers.map((drv) => {
                           const dRents = rents.filter((r) => r.driverId === drv.id);
-                          const dGas = gasExpenses.filter((g) => g.driverId === drv.id);
+                          const dGas = approvedGasExpenses.filter((g) => g.driverId === drv.id);
                           const sumRent = dRents.reduce((a, b) => a + (Number(b.totalFare) || 0), 0);
                           const sumComm = dRents.reduce(
                             (a, b) => a + (Number(b.driverCommission) || 0),
@@ -2570,7 +2682,9 @@ export default function App() {
                           <tbody className="divide-y divide-slate-100">
                             {drivers.map((drv) => {
                               const dRents = rents.filter((r) => r.driverId === drv.id);
-                              const dGas = gasExpenses.filter((g) => g.driverId === drv.id);
+                              const dGas = approvedGasExpenses.filter(
+                                (g) => g.driverId === drv.id
+                              );
                               const sumRent = dRents.reduce(
                                 (a, b) => a + (Number(b.totalFare) || 0),
                                 0
@@ -2867,9 +2981,14 @@ export default function App() {
             {adminSubTab === 'gas' && (
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="font-bold text-slate-900 text-sm sm:text-base">
-                    সকল গ্যাস খরচ ও রিসিপ্ট
-                  </h3>
+                  <div>
+                    <h3 className="font-bold text-slate-900 text-sm sm:text-base">
+                      সকল গ্যাস খরচ ও অনুমোদন
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      অনুমোদিত (Approved) গ্যাস খরচগুলোই মূল গ্যাস খরচে যুক্ত হচ্ছে
+                    </p>
+                  </div>
                   {gasExpenses.length > 0 && (
                     <button
                       type="button"
@@ -2889,13 +3008,27 @@ export default function App() {
                       {selectedGasIds.length}টি গ্যাস খরচ সিলেক্ট করা হয়েছে • মোট:{' '}
                       {formatBDT(selectedGasTotalAmount)}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleGasApprovalChange(selectedGasIds, 'approved')}
+                        className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold"
+                      >
+                        Approve করুন
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleGasApprovalChange(selectedGasIds, 'rejected')}
+                        className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold"
+                      >
+                        Reject করুন
+                      </button>
                       <button
                         type="button"
                         onClick={() => handleMarkGasPaid(selectedGasIds, true)}
-                        className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold"
+                        className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold"
                       >
-                        সিলেক্টেডগুলো Paid করুন
+                        Paid করুন
                       </button>
                       <button
                         type="button"
@@ -2911,12 +3044,15 @@ export default function App() {
                 <div className="sm:hidden space-y-3">
                   {gasExpenses.map((g) => {
                     const isChecked = selectedGasIds.includes(g.id);
+                    const approval = getGasApprovalStatus(g);
                     return (
                       <div
                         key={g.id}
                         className={`p-3.5 rounded-xl border text-xs space-y-2 transition ${
                           isChecked
                             ? 'border-amber-400 bg-amber-50/40'
+                            : approval === 'pending'
+                            ? 'border-amber-200 bg-amber-50/20'
                             : 'border-slate-200 bg-slate-50/70'
                         }`}
                       >
@@ -2932,15 +3068,32 @@ export default function App() {
                               {g.expenseDate} • {g.driverName || g.driverId}
                             </span>
                           </label>
-                          <span
-                            className={`px-2 py-0.5 rounded-full font-semibold ${
-                              g.isPaid
-                                ? 'bg-emerald-100 text-emerald-700'
-                                : 'bg-amber-100 text-amber-800'
-                            }`}
-                          >
-                            {g.isPaid ? 'Paid' : 'Unpaid'}
-                          </span>
+                          <div className="flex items-center gap-1">
+                            <span
+                              className={`px-2 py-0.5 rounded-full font-semibold ${
+                                approval === 'approved'
+                                  ? 'bg-emerald-100 text-emerald-700'
+                                  : approval === 'rejected'
+                                  ? 'bg-rose-100 text-rose-700'
+                                  : 'bg-amber-100 text-amber-800'
+                              }`}
+                            >
+                              {approval === 'approved'
+                                ? 'Approved'
+                                : approval === 'rejected'
+                                ? 'Rejected'
+                                : 'Pending'}
+                            </span>
+                            <span
+                              className={`px-2 py-0.5 rounded-full font-semibold ${
+                                g.isPaid
+                                  ? 'bg-blue-100 text-blue-700'
+                                  : 'bg-slate-200 text-slate-700'
+                              }`}
+                            >
+                              {g.isPaid ? 'Paid' : 'Unpaid'}
+                            </span>
+                          </div>
                         </div>
                         <div className="flex items-center justify-between gap-2">
                           <div>
@@ -2949,18 +3102,38 @@ export default function App() {
                               {formatBDT(g.amount)}
                             </div>
                           </div>
-                          <div className="flex items-center gap-1.5">
-                            <button
-                              type="button"
-                              onClick={() => handleMarkGasPaid([g.id], !g.isPaid)}
-                              className={`px-2.5 py-1.5 rounded-lg font-semibold ${
-                                g.isPaid
-                                  ? 'bg-amber-50 text-amber-800'
-                                  : 'bg-emerald-50 text-emerald-700'
-                              }`}
-                            >
-                              {g.isPaid ? 'Unpaid' : 'Paid'}
-                            </button>
+                          <div className="flex flex-wrap items-center justify-end gap-1.5">
+                            {approval !== 'approved' && (
+                              <button
+                                type="button"
+                                onClick={() => handleGasApprovalChange(g.id, 'approved')}
+                                className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+                              >
+                                Approve
+                              </button>
+                            )}
+                            {approval === 'pending' && (
+                              <button
+                                type="button"
+                                onClick={() => handleGasApprovalChange(g.id, 'rejected')}
+                                className="px-2.5 py-1.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 font-semibold"
+                              >
+                                Reject
+                              </button>
+                            )}
+                            {approval === 'approved' && (
+                              <button
+                                type="button"
+                                onClick={() => handleMarkGasPaid([g.id], !g.isPaid)}
+                                className={`px-2.5 py-1.5 rounded-lg font-semibold ${
+                                  g.isPaid
+                                    ? 'bg-amber-50 text-amber-800'
+                                    : 'bg-blue-50 text-blue-700'
+                                }`}
+                              >
+                                {g.isPaid ? 'Unpaid' : 'Paid'}
+                              </button>
+                            )}
                             {g.receiptImage && (
                               <button
                                 type="button"
@@ -3007,19 +3180,27 @@ export default function App() {
                         <th className="py-2.5 px-3">তারিখ</th>
                         <th className="py-2.5 px-3">ড্রাইভার</th>
                         <th className="py-2.5 px-3">গ্যাস ফিলিং স্টেশন</th>
-                        <th className="py-2.5 px-3">স্ট্যাটাস</th>
+                        <th className="py-2.5 px-3">অনুমোদন</th>
+                        <th className="py-2.5 px-3">পেমেন্ট</th>
                         <th className="py-2.5 px-3 text-right">খরচের পরিমাণ</th>
                         <th className="py-2.5 px-3 text-center">রিসিপ্ট</th>
-                        <th className="py-2.5 px-3 text-center">ডিলিট</th>
+                        <th className="py-2.5 px-3 text-center">অ্যাকশন</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {gasExpenses.map((g) => {
                         const isChecked = selectedGasIds.includes(g.id);
+                        const approval = getGasApprovalStatus(g);
                         return (
                           <tr
                             key={g.id}
-                            className={isChecked ? 'bg-amber-50/40' : 'hover:bg-slate-50'}
+                            className={
+                              isChecked
+                                ? 'bg-amber-50/40'
+                                : approval === 'pending'
+                                ? 'bg-amber-50/20 hover:bg-amber-50/40'
+                                : 'hover:bg-slate-50'
+                            }
                           >
                             <td className="py-2.5 px-3">
                               <input
@@ -3035,13 +3216,30 @@ export default function App() {
                             </td>
                             <td className="py-2.5 px-3">{g.stationName}</td>
                             <td className="py-2.5 px-3 whitespace-nowrap">
+                              <span
+                                className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                                  approval === 'approved'
+                                    ? 'bg-emerald-100 text-emerald-700'
+                                    : approval === 'rejected'
+                                    ? 'bg-rose-100 text-rose-700'
+                                    : 'bg-amber-100 text-amber-800'
+                                }`}
+                              >
+                                {approval === 'approved'
+                                  ? 'Approved'
+                                  : approval === 'rejected'
+                                  ? 'Rejected'
+                                  : 'Pending'}
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3 whitespace-nowrap">
                               <button
                                 type="button"
                                 onClick={() => handleMarkGasPaid([g.id], !g.isPaid)}
                                 className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                                   g.isPaid
                                     ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
-                                    : 'bg-amber-100 text-amber-800 hover:bg-amber-200'
+                                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                                 }`}
                               >
                                 {g.isPaid ? 'Paid' : 'Unpaid'}
@@ -3064,22 +3262,42 @@ export default function App() {
                                 <span className="text-xs text-slate-400">ছবি নেই</span>
                               )}
                             </td>
-                            <td className="py-2.5 px-3 text-center">
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteGas(g.id)}
-                                className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg"
-                                title="ডিলিট করুন"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
+                            <td className="py-2.5 px-3 text-center whitespace-nowrap">
+                              <div className="inline-flex items-center gap-1">
+                                {approval !== 'approved' && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleGasApprovalChange(g.id, 'approved')}
+                                    className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold"
+                                  >
+                                    Approve
+                                  </button>
+                                )}
+                                {approval === 'pending' && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleGasApprovalChange(g.id, 'rejected')}
+                                    className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold"
+                                  >
+                                    Reject
+                                  </button>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteGas(g.id)}
+                                  className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg"
+                                  title="ডিলিট করুন"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         );
                       })}
                       {gasExpenses.length === 0 && (
                         <tr>
-                          <td colSpan={8} className="py-8 text-center text-slate-400">
+                          <td colSpan={9} className="py-8 text-center text-slate-400">
                             এখনো কোনো গ্যাস খরচের রেকর্ড নেই।
                           </td>
                         </tr>
