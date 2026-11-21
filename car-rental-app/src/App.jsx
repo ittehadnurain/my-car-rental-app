@@ -1107,7 +1107,7 @@ export default function App() {
             </div>
             <div className="min-w-0">
               <h1 className="text-sm sm:text-lg font-bold tracking-tight text-white truncate">
-                গাড়ি ভাড়া ও হিসাব
+                হাশেম কার রেন্টাল
               </h1>
               <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-slate-300 truncate">
                 <span
