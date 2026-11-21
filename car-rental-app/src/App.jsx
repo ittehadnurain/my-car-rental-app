@@ -81,8 +81,8 @@ const DEFAULT_STATIONS = [
 ];
 
 const DEFAULT_ADMIN_CREDS = {
-  email: 'admin@rental.com',
-  password: 'admin123'
+  email: 'ittehadnurain2007@gmail.com',
+  password: 'Ittehad97'
 };
 
 const FIRESTORE_RULES_TEXT = `rules_version = '2';
