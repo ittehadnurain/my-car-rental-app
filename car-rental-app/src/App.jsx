@@ -66,7 +66,7 @@ try {
 }
 
 // ==========================================
-// 2. SEED / DEFAULT DATA (EMPTY FOR LIVE USE)
+// 2. SEED / DEFAULT DATA & ADMIN ACCOUNTS
 // ==========================================
 const DEFAULT_DRIVERS = [];
 const DEFAULT_STATIONS = [];
@@ -76,13 +76,13 @@ const ADMIN_USERS = [
     email: 'ittehadnurain2007@gmail.com',
     phone: '01877695700',
     password: 'Ittehad97',
-    name: 'প্রথম অ্যাডমিন'
+    name: 'Ittehad Nur'
   },
   {
-    email: '01858050997',
+    email: '',
     phone: '01858050997',
     password: '01858050997',
-    name: 'দ্বিতীয় অ্যাডমিন'
+    name: 'Kamrun Nahar'
   }
 ];
 
@@ -417,33 +417,33 @@ export default function App() {
   };
 
   const handleAdminLogin = (e) => {
-  e.preventDefault();
-  setLoginError('');
-  const cleanInput = adminLoginEmail.trim().toLowerCase();
-  const cleanPass = adminLoginPassword.trim();
+    e.preventDefault();
+    setLoginError('');
+    const cleanInput = adminLoginEmail.trim().toLowerCase();
+    const cleanPass = adminLoginPassword.trim();
 
-  const matchedAdmin = ADMIN_USERS.find(
-    (adm) =>
-      (adm.email.toLowerCase() === cleanInput || adm.phone.trim() === adminLoginEmail.trim()) &&
-      adm.password === cleanPass
-  );
+    const matchedAdmin = ADMIN_USERS.find(
+      (adm) =>
+        (adm.email.toLowerCase() === cleanInput || adm.phone.trim() === adminLoginEmail.trim()) &&
+        adm.password === cleanPass
+    );
 
-  if (matchedAdmin) {
-    const sessionData = {
-      role: 'admin',
-      email: matchedAdmin.email,
-      phone: matchedAdmin.phone,
-      name: matchedAdmin.name
-    };
-    setCurrentUser(sessionData);
-    setAdminLoginEmail('');
-    setAdminLoginPassword('');
-    writeAuditLog(`অ্যাডমিন লগইন: ${matchedAdmin.email} / ${matchedAdmin.phone}`, matchedAdmin.name);
-    showToast(`${matchedAdmin.name} প্যানেলে স্বাগতম!`);
-  } else {
-    setLoginError('ভুল অ্যাডমিন ইমেইল/মোবাইল নম্বর বা পাসওয়ার্ড।');
-  }
-};
+    if (matchedAdmin) {
+      const sessionData = {
+        role: 'admin',
+        email: matchedAdmin.email,
+        phone: matchedAdmin.phone,
+        name: matchedAdmin.name
+      };
+      setCurrentUser(sessionData);
+      setAdminLoginEmail('');
+      setAdminLoginPassword('');
+      writeAuditLog(`অ্যাডমিন লগইন: ${matchedAdmin.email} / ${matchedAdmin.phone}`, matchedAdmin.name);
+      showToast(`${matchedAdmin.name} প্যানেলে স্বাগতম!`);
+    } else {
+      setLoginError('ভুল অ্যাডমিন ইমেইল/মোবাইল নম্বর বা পাসওয়ার্ড।');
+    }
+  };
 
   const handleLogout = () => {
     if (currentUser) {
@@ -1023,18 +1023,19 @@ export default function App() {
             ) : (
               <form onSubmit={handleAdminLogin} className="space-y-4">
                 <div>
-  <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-    অ্যাডমিন ইমেইল বা মোবাইল নম্বর *
-  </label>
-  <input
-    type="text"
-    value={adminLoginEmail}
-    onChange={(e) => setAdminLoginEmail(e.target.value)}
-    placeholder="ইমেইল বা 017XXXXXXXX দিন"
-    className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-800 focus:border-slate-800 outline-none text-base"
-    required
-  />
-</div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                    অ্যাডমিন ইমেইল বা মোবাইল নম্বর *
+                  </label>
+                  <input
+                    type="text"
+                    value={adminLoginEmail}
+                    onChange={(e) => setAdminLoginEmail(e.target.value)}
+                    placeholder="ইমেইল বা 017XXXXXXXX দিন"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-800 focus:border-slate-800 outline-none text-base"
+                    required
+                  />
+                </div>
+                <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">
                     পাসওয়ার্ড *
                   </label>
@@ -1100,7 +1101,7 @@ export default function App() {
             </div>
             <div className="min-w-0">
               <h1 className="text-sm sm:text-lg font-bold tracking-tight text-white truncate">
-                হাশেম কার রেন্টাল
+                গাড়ি ভাড়া ও হিসাব
               </h1>
               <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-slate-300 truncate">
                 <span
@@ -1379,7 +1380,6 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Compact Rent Date Section */}
                   <div className="sm:col-span-1 min-w-0">
                     <label className="block text-xs font-semibold text-slate-700 mb-1 truncate">
                       ভাড়ার তারিখ *
@@ -1397,7 +1397,6 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Trip Type */}
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">
                     ভাড়ার ধরন *
@@ -1430,7 +1429,6 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Auto Calculation Breakdown Box */}
                 <div className="bg-slate-900 text-white rounded-2xl p-4">
                   <div className="text-[11px] sm:text-xs uppercase tracking-wider text-emerald-400 font-semibold mb-2.5">
                     স্বয়ংক্রিয় হিসাব (২৫% ড্রাইভার কমিশন)
@@ -1470,7 +1468,6 @@ export default function App() {
               </form>
             </div>
 
-            {/* Recent Rents Card List for Driver */}
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5">
               <h3 className="font-bold text-slate-900 mb-3 flex items-center justify-between text-sm sm:text-base">
                 <span>আপনার সাম্প্রতিক ভাড়া</span>
@@ -1655,7 +1652,6 @@ export default function App() {
               </form>
             </div>
 
-            {/* Recent Gas Card List for Driver */}
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5">
               <h3 className="font-bold text-slate-900 mb-3 text-sm sm:text-base">
                 আপনার সাম্প্রতিক গ্যাস খরচ
@@ -1793,7 +1789,6 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Mobile: Stacked (grid-cols-1), Desktop/Tablet: Side-by-side (sm:grid-cols-2) */}
                 <div className="md:col-span-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div className="min-w-0">
                     <label className="block text-xs font-semibold text-slate-600 mb-1">
@@ -1827,7 +1822,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Report Sheet */}
             <div className="print-card bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6">
               <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 pb-4 mb-5">
                 <div>
@@ -1854,7 +1848,6 @@ export default function App() {
                 </div>
               </div>
 
-              {/* KPI Cards */}
               <div
                 className={`grid grid-cols-2 ${
                   isDriver ? 'sm:grid-cols-3' : 'lg:grid-cols-4'
@@ -1895,7 +1888,6 @@ export default function App() {
                 )}
               </div>
 
-              {/* Rent List: Mobile Cards */}
               <h4 className="font-bold text-slate-800 text-sm mb-2.5">ভাড়ার বিস্তারিত</h4>
               <div className="sm:hidden space-y-2.5 mb-6">
                 {filteredSummary.matchingRents.map((r) => (
@@ -1931,7 +1923,6 @@ export default function App() {
                 )}
               </div>
 
-              {/* Rent List: Desktop Table */}
               <div className="hidden sm:block overflow-x-auto border border-slate-200 rounded-xl mb-6">
                 <table className="w-full text-left border-collapse text-sm">
                   <thead>
@@ -1987,7 +1978,6 @@ export default function App() {
                 </table>
               </div>
 
-              {/* Gas List: Mobile Cards */}
               <h4 className="font-bold text-slate-800 text-sm mb-2.5">গ্যাস খরচের বিস্তারিত</h4>
               <div className="sm:hidden space-y-2.5">
                 {filteredSummary.matchingGas.map((g) => (
@@ -2019,7 +2009,6 @@ export default function App() {
                 )}
               </div>
 
-              {/* Gas List: Desktop Table */}
               <div className="hidden sm:block overflow-x-auto border border-slate-200 rounded-xl">
                 <table className="w-full text-left border-collapse text-sm">
                   <thead>
