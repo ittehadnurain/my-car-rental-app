@@ -39,7 +39,8 @@ import {
   Copy,
   Check,
   AlertCircle,
-  Camera
+  Camera,
+  MessageCircle
 } from 'lucide-react';
 
 // ==========================================
@@ -53,6 +54,9 @@ const firebaseConfig = {
   messagingSenderId: "483269161250",
   appId: "1:483269161250:web:aa67a162afe8fc093fb57b"
 };
+
+// দেশের কোড (880) সহ আপনার WhatsApp নম্বর লিখুন (কোনো + বা space ছাড়া)
+const ADMIN_WHATSAPP_NUMBER = '8801877695700';
 
 let db = null;
 let isFirebaseReady = false;
@@ -283,6 +287,16 @@ export default function App() {
       setToast(null);
     }, 3500);
   };
+
+  // Build WhatsApp URL with pre-filled driver context
+  const whatsappUrl = useMemo(() => {
+    const cleanPhone = String(ADMIN_WHATSAPP_NUMBER || '').replace(/\D/g, '');
+    const greetingText =
+      currentUser?.role === 'driver'
+        ? `আসসালামু আলাইকুম, আমি ${currentUser.name} (${currentUser.driverId})।`
+        : 'আসসালামু আলাইকুম, হাশেম কার রেন্টাল থেকে যোগাযোগ করছি।';
+    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(greetingText)}`;
+  }, [currentUser]);
 
   // Persist Session User
   useEffect(() => {
@@ -1180,8 +1194,7 @@ export default function App() {
     };
   }, [rents, approvedGasExpenses, currentUser, reportScope, selectedDriverId, startDate, endDate]);
 
-  // Overall Admin Totals (Only Admin-approved gas expenses count in Gas Expense;
-  // Unpaid is clamped at 0 so it never goes negative, and any remaining approved gas is deducted from Paid)
+  // Overall Admin Totals
   const overallTotals = useMemo(() => {
     const totalRents = rents.reduce((sum, r) => sum + (Number(r.totalFare) || 0), 0);
     const totalCommission = rents.reduce((sum, r) => sum + (Number(r.driverCommission) || 0), 0);
@@ -1394,6 +1407,19 @@ export default function App() {
             )}
           </div>
         </div>
+
+        {/* Floating WhatsApp Corner Button on Login Screen */}
+        <a
+          href={whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="WhatsApp-এ যোগাযোগ করুন"
+          title="WhatsApp-এ যোগাযোগ করুন"
+          className="fixed bottom-5 right-5 z-40 flex items-center gap-2 px-4 py-3 rounded-full bg-[#25D366] hover:bg-[#1ebe5d] active:scale-95 text-white font-bold text-sm shadow-xl transition"
+        >
+          <MessageCircle className="w-5 h-5 shrink-0" />
+          <span>WhatsApp</span>
+        </a>
       </div>
     );
   }
@@ -1405,7 +1431,7 @@ export default function App() {
   const isDriver = currentUser.role === 'driver';
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col pb-20 sm:pb-8">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col pb-24 sm:pb-12">
       <style>{`
         .print-only { display: none; }
         @media print {
@@ -2603,7 +2629,7 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Paid & Unpaid Rent Cards (Unpaid never goes below 0; remaining gas is deducted from Paid) */}
+                {/* Paid & Unpaid Rent Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="bg-emerald-50/80 p-4 rounded-2xl border border-emerald-200 flex items-center justify-between">
                     <div>
@@ -3658,6 +3684,19 @@ export default function App() {
           </div>
         )}
       </main>
+
+      {/* Floating WhatsApp Corner Button */}
+      <a
+        href={whatsappUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="WhatsApp-এ যোগাযোগ করুন"
+        title="WhatsApp-এ যোগাযোগ করুন"
+        className="no-print fixed bottom-20 sm:bottom-5 right-3.5 sm:right-5 z-40 flex items-center gap-2 px-3.5 py-3 rounded-full bg-[#25D366] hover:bg-[#1ebe5d] active:scale-95 text-white font-bold text-xs sm:text-sm shadow-xl transition"
+      >
+        <MessageCircle className="w-5 h-5 shrink-0" />
+        <span>WhatsApp</span>
+      </a>
 
       {/* ============================================================ */}
       {/* MODALS: RECEIPT VIEWER, EDIT RENT, EDIT DRIVER PIN           */}
