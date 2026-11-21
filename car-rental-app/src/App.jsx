@@ -149,6 +149,28 @@ const getGasApprovalStatus = (gas) => {
   return gas.approvalStatus;
 };
 
+// Deduct approved gas from unpaid rent first (clamped at 0 so unpaid never goes negative),
+// and deduct any remaining approved gas from paid rent
+const calculatePaidAndUnpaidAfterGas = (paidRentAfterComm, unpaidRentAfterComm, approvedGasTotal) => {
+  const paidBase = Math.max(0, Number(paidRentAfterComm) || 0);
+  const unpaidBase = Math.max(0, Number(unpaidRentAfterComm) || 0);
+  const gasTotal = Math.max(0, Number(approvedGasTotal) || 0);
+
+  const gasDeductedFromUnpaid = Math.min(unpaidBase, gasTotal);
+  const unpaidRentAmount = +(unpaidBase - gasDeductedFromUnpaid).toFixed(2);
+  const gasDeductedFromPaid = +(gasTotal - gasDeductedFromUnpaid).toFixed(2);
+  const paidNetRentAfterGas = +(paidBase - gasDeductedFromPaid).toFixed(2);
+
+  return {
+    paidRentAmount: paidBase,
+    unpaidRentAfterCommission: unpaidBase,
+    gasDeductedFromUnpaid,
+    gasDeductedFromPaid,
+    unpaidRentAmount,
+    paidNetRentAfterGas
+  };
+};
+
 const compressImageToBase64 = (file, maxWidth = 800, quality = 0.65) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -654,7 +676,7 @@ export default function App() {
 
       const statusLabel =
         nextStatus === 'approved'
-          ? 'Approved (গ্যাস খরচ ও Unpaid হিসাবে যুক্ত)'
+          ? 'Approved (গ্যাস খরচ হিসেবে যুক্ত)'
           : nextStatus === 'rejected'
           ? 'Rejected'
           : 'Pending';
@@ -667,7 +689,7 @@ export default function App() {
       setSelectedGasIds((prev) => prev.filter((id) => !idsArray.includes(id)));
       showToast(
         nextStatus === 'approved'
-          ? `${idsArray.length}টি গ্যাস খরচ অনুমোদিত হয়েছে এবং এখন গ্যাস খরচ ও Unpaid হিসাবে গণনা হবে!`
+          ? `${idsArray.length}টি গ্যাস খরচ অনুমোদিত হয়েছে এবং এখন গ্যাস খরচে গণনা হবে!`
           : nextStatus === 'rejected'
           ? `${idsArray.length}টি গ্যাস খরচ বাতিল (Rejected) করা হয়েছে`
           : `${idsArray.length}টি গ্যাস খরচ Pending-এ রাখা হয়েছে`
@@ -745,7 +767,7 @@ export default function App() {
     }
   };
 
-  // Submit Gas Expense Entry (Always starts as 'pending' — only added to Gas & Unpaid after Admin approves)
+  // Submit Gas Expense Entry (Always starts as 'pending' — only added to Gas Expenses after Admin approves)
   const handleGasSubmit = async (e) => {
     e.preventDefault();
     const targetDriverId = currentUser?.role === 'driver' ? currentUser.driverId : selectedDriverId;
@@ -801,7 +823,7 @@ export default function App() {
         currentUser?.name || targetDriverId
       );
       showToast(
-        'গ্যাস খরচ Pending অবস্থায় সেভ হয়েছে। অ্যাডমিন Approve করলে গ্যাস ও Unpaid হিসাবে যুক্ত হবে।'
+        'গ্যাস খরচ Pending অবস্থায় সেভ হয়েছে। অ্যাডমিন Approve করলে গ্যাস খরচে যুক্ত হবে।'
       );
       setGasAmount('');
       setReceiptBase64('');
@@ -1070,7 +1092,7 @@ export default function App() {
     setTimeout(() => setCopiedRules(false), 2500);
   };
 
-  // Only Admin-approved gas expenses are added to Gas Expenses & Unpaid calculations
+  // Only Admin-approved gas expenses are added to Gas Expenses
   const approvedGasExpenses = useMemo(
     () => gasExpenses.filter((g) => getGasApprovalStatus(g) === 'approved'),
     [gasExpenses]
@@ -1082,7 +1104,6 @@ export default function App() {
   );
 
   // Filtered Rents & Approved Gas Expenses for Summary Report
-  // Approved gas expenses are added to Gas Expense and deducted (after 25% commission) in Unpaid
   const filteredSummary = useMemo(() => {
     const isAllDrivers = currentUser?.role === 'admin' && reportScope === 'all';
     const targetId = currentUser?.role === 'driver' ? currentUser.driverId : selectedDriverId;
@@ -1113,23 +1134,19 @@ export default function App() {
       0
     );
 
-    const paidRentAmount = paidRents.reduce((acc, r) => acc + getRentNetAfterCommission(r), 0);
-    const unpaidRentAfterCommission = unpaidRents.reduce(
-      (acc, r) => acc + getRentNetAfterCommission(r),
-      0
-    );
+    const paidRentAfterComm = paidRents.reduce((acc, r) => acc + getRentNetAfterCommission(r), 0);
+    const unpaidRentAfterComm = unpaidRents.reduce((acc, r) => acc + getRentNetAfterCommission(r), 0);
 
-    // Only approved gas expenses count in totalGasAmount and Unpaid gas deduction
     const totalGasAmount = matchingGas.reduce((acc, g) => acc + (Number(g.amount) || 0), 0);
-    const approvedUnpaidGasAmount = matchingGas
-      .filter((g) => !g.isPaid)
-      .reduce((acc, g) => acc + (Number(g.amount) || 0), 0);
-    const paidGasAmount = matchingGas
-      .filter((g) => Boolean(g.isPaid))
-      .reduce((acc, g) => acc + (Number(g.amount) || 0), 0);
 
-    const paidNetRentAfterGas = paidRentAmount - paidGasAmount;
-    const unpaidRentAmount = unpaidRentAfterCommission - totalGasAmount;
+    const {
+      paidRentAmount,
+      unpaidRentAfterCommission,
+      gasDeductedFromUnpaid,
+      gasDeductedFromPaid,
+      unpaidRentAmount,
+      paidNetRentAfterGas
+    } = calculatePaidAndUnpaidAfterGas(paidRentAfterComm, unpaidRentAfterComm, totalGasAmount);
 
     const totalRentAmount = matchingRents.reduce((acc, r) => acc + (Number(r.totalFare) || 0), 0);
     const totalDriverCommission = matchingRents.reduce(
@@ -1151,9 +1168,9 @@ export default function App() {
       unpaidRentGrossAmount,
       paidRentAmount,
       unpaidRentAfterCommission,
+      gasDeductedFromUnpaid,
+      gasDeductedFromPaid,
       unpaidRentAmount,
-      approvedUnpaidGasAmount,
-      paidGasAmount,
       paidNetRentAfterGas,
       totalRentAmount,
       totalDriverCommission,
@@ -1163,7 +1180,8 @@ export default function App() {
     };
   }, [rents, approvedGasExpenses, currentUser, reportScope, selectedDriverId, startDate, endDate]);
 
-  // Overall Admin Totals (Only Admin-approved gas expenses are added to Gas Expense & Unpaid)
+  // Overall Admin Totals (Only Admin-approved gas expenses count in Gas Expense;
+  // Unpaid is clamped at 0 so it never goes negative, and any remaining approved gas is deducted from Paid)
   const overallTotals = useMemo(() => {
     const totalRents = rents.reduce((sum, r) => sum + (Number(r.totalFare) || 0), 0);
     const totalCommission = rents.reduce((sum, r) => sum + (Number(r.driverCommission) || 0), 0);
@@ -1174,17 +1192,17 @@ export default function App() {
     const paidTotalRents = rents
       .filter((r) => Boolean(r.isPaid))
       .reduce((sum, r) => sum + getRentNetAfterCommission(r), 0);
-    const unpaidRentsAfterCommission = rents
+    const unpaidRentsRaw = rents
       .filter((r) => !r.isPaid)
       .reduce((sum, r) => sum + getRentNetAfterCommission(r), 0);
 
-    const unpaidTotalRents = unpaidRentsAfterCommission - totalGas;
-
-    const paidTotalGas = approvedGasExpenses
-      .filter((g) => Boolean(g.isPaid))
-      .reduce((sum, g) => sum + (Number(g.amount) || 0), 0);
-
-    const paidNetRentAfterGas = paidTotalRents - paidTotalGas;
+    const {
+      unpaidRentAfterCommission,
+      gasDeductedFromUnpaid,
+      gasDeductedFromPaid,
+      unpaidRentAmount: unpaidTotalRents,
+      paidNetRentAfterGas
+    } = calculatePaidAndUnpaidAfterGas(paidTotalRents, unpaidRentsRaw, totalGas);
 
     return {
       totalRents,
@@ -1193,9 +1211,10 @@ export default function App() {
       totalGas,
       netOwnerProfit,
       paidTotalRents,
-      unpaidRentsAfterCommission,
+      unpaidRentsAfterCommission: unpaidRentAfterCommission,
+      gasDeductedFromUnpaid,
+      gasDeductedFromPaid,
       unpaidTotalRents,
-      paidTotalGas,
       paidNetRentAfterGas
     };
   }, [rents, approvedGasExpenses]);
@@ -1865,7 +1884,7 @@ export default function App() {
                   গ্যাস-খরচ ইনপুট
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  সাবমিট করার পর অ্যাডমিন অনুমোদন করলে এটি গ্যাস ও Unpaid হিসাবে যুক্ত হবে
+                  সাবমিট করার পর অ্যাডমিন অনুমোদন করলে এটি গ্যাস খরচে যুক্ত হবে
                 </p>
               </div>
 
@@ -2065,7 +2084,7 @@ export default function App() {
                     {isDriver ? 'আমার সামারি রিপোর্ট' : 'সামারি রিপোর্ট ও PDF প্রিন্ট'}
                   </h2>
                   <p className="text-xs text-slate-500">
-                    ৭, ১০, ১৫, ৩০ দিন বা কাস্টম তারিখে হিসাব দেখুন (অ্যাডমিন Approve করলে গ্যাস খরচ Unpaid-এ যুক্ত হয়)
+                    ৭, ১০, ১৫, ৩০ দিন বা কাস্টম তারিখে হিসাব দেখুন (Unpaid শেষ হলে বাকি গ্যাস Paid ভাড়া থেকে কাটা হয়)
                   </p>
                 </div>
 
@@ -2242,17 +2261,17 @@ export default function App() {
                 )}
               </div>
 
-              {/* Paid vs Unpaid Summary Cards (Approved Gas added to Unpaid calculation) */}
+              {/* Paid & Unpaid Summary Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
                 <div className="p-3.5 rounded-xl bg-emerald-50/80 border border-emerald-200 flex items-center justify-between gap-2">
                   <div>
                     <div className="text-xs font-semibold text-emerald-800">
-                      আদায়কৃত ভাড়া (Paid • ২৫% ও Paid গ্যাস বাদে)
+                      আদায়কৃত ভাড়া (Paid • ২৫% ও অবশিষ্ট গ্যাস বাদে)
                     </div>
                     <div className="text-[11px] text-emerald-700/80 mt-0.5">
                       {filteredSummary.paidRents.length}টি ট্রিপ • Paid ভাড়া:{' '}
-                      {formatBDT(filteredSummary.paidRentAmount)} − Paid গ্যাস:{' '}
-                      {formatBDT(filteredSummary.paidGasAmount)}
+                      {formatBDT(filteredSummary.paidRentAmount)} − গ্যাস কাটা:{' '}
+                      {formatBDT(filteredSummary.gasDeductedFromPaid)}
                     </div>
                   </div>
                   <div className="text-base sm:text-lg font-bold text-emerald-700">
@@ -2267,8 +2286,8 @@ export default function App() {
                     </div>
                     <div className="text-[11px] text-rose-700/80 mt-0.5">
                       {filteredSummary.unpaidRents.length}টি ট্রিপ • ২৫% বাদে:{' '}
-                      {formatBDT(filteredSummary.unpaidRentAfterCommission)} − অনুমোদিত গ্যাস:{' '}
-                      {formatBDT(filteredSummary.totalGasAmount)}
+                      {formatBDT(filteredSummary.unpaidRentAfterCommission)} − গ্যাস কাটা:{' '}
+                      {formatBDT(filteredSummary.gasDeductedFromUnpaid)}
                     </div>
                   </div>
                   <div className="text-base sm:text-lg font-bold text-rose-700">
@@ -2584,16 +2603,16 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Paid vs Unpaid Rent Cards (Approved Gas added to Unpaid calculation) */}
+                {/* Paid & Unpaid Rent Cards (Unpaid never goes below 0; remaining gas is deducted from Paid) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="bg-emerald-50/80 p-4 rounded-2xl border border-emerald-200 flex items-center justify-between">
                     <div>
                       <div className="text-xs font-semibold text-emerald-800">
-                        মোট আদায়কৃত ভাড়া (Paid • ২৫% ও Paid গ্যাস বাদে)
+                        মোট আদায়কৃত ভাড়া (Paid • ২৫% ও অবশিষ্ট গ্যাস বাদে)
                       </div>
                       <div className="text-[11px] text-emerald-700 mt-0.5">
-                        Paid ভাড়া {formatBDT(overallTotals.paidTotalRents)} − Paid গ্যাস{' '}
-                        {formatBDT(overallTotals.paidTotalGas)}
+                        Paid ভাড়া {formatBDT(overallTotals.paidTotalRents)} − গ্যাস কাটা{' '}
+                        {formatBDT(overallTotals.gasDeductedFromPaid)}
                       </div>
                     </div>
                     <div className="text-lg sm:text-xl font-bold text-emerald-700">
@@ -2607,8 +2626,8 @@ export default function App() {
                         মোট বাকি ভাড়া (Unpaid • ২৫% ও অনুমোদিত গ্যাস বাদে)
                       </div>
                       <div className="text-[11px] text-rose-700 mt-0.5">
-                        ২৫% বাদে {formatBDT(overallTotals.unpaidRentsAfterCommission)} − অনুমোদিত গ্যাস{' '}
-                        {formatBDT(overallTotals.totalGas)}
+                        ২৫% বাদে {formatBDT(overallTotals.unpaidRentsAfterCommission)} − গ্যাস কাটা{' '}
+                        {formatBDT(overallTotals.gasDeductedFromUnpaid)}
                       </div>
                     </div>
                     <div className="text-lg sm:text-xl font-bold text-rose-700">
@@ -3000,7 +3019,7 @@ export default function App() {
                       সকল গ্যাস খরচ ও অনুমোদন
                     </h3>
                     <p className="text-xs text-slate-500 mt-0.5">
-                      অ্যাডমিন Approve করলেই গ্যাস খরচ ও Unpaid হিসাবে যুক্ত হবে
+                      অ্যাডমিন Approve করলেই গ্যাস খরচ হিসেবে যুক্ত হবে (সব ভাড়া Paid থাকলে Paid ভাড়া থেকে সমন্বয় হবে)
                     </p>
                   </div>
                   {gasExpenses.length > 0 && (
