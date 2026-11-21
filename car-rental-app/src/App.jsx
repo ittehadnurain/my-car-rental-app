@@ -16,7 +16,6 @@ import {
   Car,
   Fuel,
   LayoutDashboard,
-  Users,
   MapPin,
   FileText,
   Printer,
@@ -73,8 +72,8 @@ const DEFAULT_DRIVERS = [];
 const DEFAULT_STATIONS = [];
 
 const DEFAULT_ADMIN_CREDS = {
-  email: 'ittehadnurain2007@gmail.com',
-  password: 'Ittehad97'
+  email: 'admin@rental.com',
+  password: 'admin123'
 };
 
 const FIRESTORE_RULES_TEXT = `rules_version = '2';
@@ -267,7 +266,7 @@ export default function App() {
     }
   };
 
-  // Real-time Firestore Listeners (No Auto-Reseed of Deleted Defaults)
+  // Real-time Firestore Listeners
   useEffect(() => {
     if (!isFirebaseReady || !db) {
       setIsLoadingData(false);
@@ -977,7 +976,7 @@ export default function App() {
                     type="text"
                     value={driverLoginId}
                     onChange={(e) => setDriverLoginId(e.target.value)}
-                    placeholder="যেমন: DRV-101 বা 017XXXXXXXX"
+                    placeholder="যেমন: DRV-01 বা 017XXXXXXXX"
                     className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-base"
                     required
                   />
@@ -1190,7 +1189,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* Mobile Bottom Navigation Bar (Easy Thumb Reach on Phone) */}
+      {/* Mobile Bottom Navigation Bar */}
       <nav className="no-print sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-slate-900/95 backdrop-blur border-t border-slate-700 px-2 py-1.5">
         <div className={`grid ${isDriver ? 'grid-cols-3' : 'grid-cols-2'} gap-1`}>
           {isDriver && (
@@ -1364,7 +1363,7 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div>
+                  <div className="min-w-0">
                     <label className="block text-sm font-semibold text-slate-700 mb-1">
                       ভাড়ার তারিখ *
                     </label>
@@ -1374,7 +1373,7 @@ export default function App() {
                         type="date"
                         value={rentDate}
                         onChange={(e) => setRentDate(e.target.value)}
-                        className="w-full pl-10 pr-3.5 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm sm:text-base"
+                        className="w-full min-w-0 pl-10 pr-3.5 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm sm:text-base bg-white"
                         required
                       />
                     </div>
@@ -1522,7 +1521,7 @@ export default function App() {
 
               <form onSubmit={handleGasSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
-                  <div>
+                  <div className="min-w-0">
                     <label className="block text-sm font-semibold text-slate-700 mb-1">
                       তারিখ *
                     </label>
@@ -1530,7 +1529,7 @@ export default function App() {
                       type="date"
                       value={gasDate}
                       onChange={(e) => setGasDate(e.target.value)}
-                      className="w-full px-3.5 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none text-base"
+                      className="w-full min-w-0 px-3.5 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none text-base bg-white"
                       required
                     />
                   </div>
@@ -1715,7 +1714,7 @@ export default function App() {
 
               <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 mt-4 items-end">
                 {isAdmin && (
-                  <div className="md:col-span-3">
+                  <div className="md:col-span-3 min-w-0">
                     <label className="block text-xs font-semibold text-slate-600 mb-1">
                       রিপোর্টের আওতা
                     </label>
@@ -1731,7 +1730,7 @@ export default function App() {
                 )}
 
                 {isAdmin && reportScope === 'single' && (
-                  <div className="md:col-span-3">
+                  <div className="md:col-span-3 min-w-0">
                     <label className="block text-xs font-semibold text-slate-600 mb-1">
                       ড্রাইভার নির্বাচন
                     </label>
@@ -1749,7 +1748,7 @@ export default function App() {
                   </div>
                 )}
 
-                <div className={isAdmin && reportScope === 'single' ? 'md:col-span-6' : 'md:col-span-5'}>
+                <div className={isAdmin && reportScope === 'single' ? 'md:col-span-6 min-w-0' : 'md:col-span-5 min-w-0'}>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">
                     সময়কাল
                   </label>
@@ -1777,36 +1776,39 @@ export default function App() {
                   </div>
                 </div>
 
+                {/* Mobile: Stacked (grid-cols-1), Desktop/Tablet: Side-by-side (sm:grid-cols-2) */}
                 <div className="md:col-span-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-  <div className="min-w-0">
-    <label className="block text-xs font-semibold text-slate-600 mb-1">
-      শুরুর তারিখ
-    </label>
-    <input
-      type="date"
-      value={startDate}
-      onChange={(e) => {
-        setDatePreset('custom');
-        setStartDate(e.target.value);
-      }}
-      className="w-full min-w-0 px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white"
-    />
-  </div>
-  <div className="min-w-0">
-    <label className="block text-xs font-semibold text-slate-600 mb-1">
-      শেষ তারিখ
-    </label>
-    <input
-      type="date"
-      value={endDate}
-      onChange={(e) => {
-        setDatePreset('custom');
-        setEndDate(e.target.value);
-      }}
-      className="w-full min-w-0 px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white"
-    />
-  </div>
-</div>
+                  <div className="min-w-0">
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">
+                      শুরুর তারিখ
+                    </label>
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => {
+                        setDatePreset('custom');
+                        setStartDate(e.target.value);
+                      }}
+                      className="w-full min-w-0 px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">
+                      শেষ তারিখ
+                    </label>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => {
+                        setDatePreset('custom');
+                        setEndDate(e.target.value);
+                      }}
+                      className="w-full min-w-0 px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {/* Report Sheet */}
             <div className="print-card bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6">
@@ -2061,7 +2063,6 @@ export default function App() {
         {/* ============================================================ */}
         {isAdmin && activeTab === 'admin' && (
           <div className="space-y-5">
-            {/* Sub-navigation for Admin */}
             <div className="flex overflow-x-auto gap-1.5 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
               {[
                 { id: 'overview', label: 'ওভারভিউ' },
@@ -2086,7 +2087,6 @@ export default function App() {
               ))}
             </div>
 
-            {/* Admin Subtab: Overview */}
             {adminSubTab === 'overview' && (
               <div className="space-y-5">
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -2131,7 +2131,6 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Driver-wise Summary Cards on Mobile / Table on Desktop */}
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
                   <h3 className="font-bold text-slate-900 mb-3 text-sm sm:text-base">
                     ড্রাইভারভিত্তিক হিসাব
@@ -2274,7 +2273,6 @@ export default function App() {
               </div>
             )}
 
-            {/* Admin Subtab: All Rents */}
             {adminSubTab === 'rents' && (
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
                 <h3 className="font-bold text-slate-900 mb-3.5 text-sm sm:text-base">
@@ -2397,7 +2395,6 @@ export default function App() {
               </div>
             )}
 
-            {/* Admin Subtab: All Gas Expenses */}
             {adminSubTab === 'gas' && (
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
                 <h3 className="font-bold text-slate-900 mb-3.5 text-sm sm:text-base">
@@ -2508,7 +2505,6 @@ export default function App() {
               </div>
             )}
 
-            {/* Admin Subtab: Manage Drivers & PINs */}
             {adminSubTab === 'drivers' && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
                 <form
@@ -2668,7 +2664,6 @@ export default function App() {
               </div>
             )}
 
-            {/* Admin Subtab: Manage Gas Stations */}
             {adminSubTab === 'stations' && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
                 <form
@@ -2748,7 +2743,6 @@ export default function App() {
               </div>
             )}
 
-            {/* Admin Subtab: Security, Backup & Firestore Rules */}
             {adminSubTab === 'security' && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 space-y-4">
@@ -2913,8 +2907,8 @@ export default function App() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="min-w-0">
                 <label className="block text-xs font-semibold text-slate-600 mb-1">
                   মোট ভাড়া (টাকা)
                 </label>
@@ -2928,7 +2922,7 @@ export default function App() {
                   required
                 />
               </div>
-              <div>
+              <div className="min-w-0">
                 <label className="block text-xs font-semibold text-slate-600 mb-1">
                   তারিখ
                 </label>
@@ -2936,13 +2930,13 @@ export default function App() {
                   type="date"
                   value={editingRent.rentDate}
                   onChange={(e) => setEditingRent({ ...editingRent, rentDate: e.target.value })}
-                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm"
+                  className="w-full min-w-0 px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white"
                   required
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">
                   যাত্রীর নম্বর
