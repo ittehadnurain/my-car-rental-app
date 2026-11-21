@@ -711,7 +711,7 @@ export default function App() {
         currentUser?.name || 'Admin'
       );
 
-      setSelectedGasIds((prev) => prev.filter((id) => !targetIds.includes(id)));
+      setSelectedGasIds((prev) => prev.filter((id) => !idsArray.includes(id)));
       showToast(
         nextPaidStatus
           ? `${targetIds.length}টি গ্যাস খরচে Paid ট্যাগ লাগানো হয়েছে`
@@ -1079,6 +1079,7 @@ export default function App() {
   );
 
   // Filtered Rents & Approved Gas Expenses for Summary Report
+  // Unpaid Rent = Unpaid rents (after 25% commission) minus approved gas expenses
   const filteredSummary = useMemo(() => {
     const isAllDrivers = currentUser?.role === 'admin' && reportScope === 'all';
     const targetId = currentUser?.role === 'driver' ? currentUser.driverId : selectedDriverId;
@@ -1110,13 +1111,18 @@ export default function App() {
     );
 
     const paidRentAmount = paidRents.reduce((acc, r) => acc + getRentNetAfterCommission(r), 0);
-    const unpaidRentAmount = unpaidRents.reduce((acc, r) => acc + getRentNetAfterCommission(r), 0);
+    const unpaidRentAfterCommission = unpaidRents.reduce(
+      (acc, r) => acc + getRentNetAfterCommission(r),
+      0
+    );
 
+    const totalGasAmount = matchingGas.reduce((acc, g) => acc + (Number(g.amount) || 0), 0);
     const paidGasAmount = matchingGas
       .filter((g) => Boolean(g.isPaid))
       .reduce((acc, g) => acc + (Number(g.amount) || 0), 0);
 
     const paidNetRentAfterGas = paidRentAmount - paidGasAmount;
+    const unpaidRentAmount = unpaidRentAfterCommission - totalGasAmount;
 
     const totalRentAmount = matchingRents.reduce((acc, r) => acc + (Number(r.totalFare) || 0), 0);
     const totalDriverCommission = matchingRents.reduce(
@@ -1127,7 +1133,6 @@ export default function App() {
       (acc, r) => acc + getRentNetAfterCommission(r),
       0
     );
-    const totalGasAmount = matchingGas.reduce((acc, g) => acc + (Number(g.amount) || 0), 0);
     const ownerNetIncome = totalRemainingFare - totalGasAmount;
 
     return {
@@ -1138,6 +1143,7 @@ export default function App() {
       paidRentGrossAmount,
       unpaidRentGrossAmount,
       paidRentAmount,
+      unpaidRentAfterCommission,
       unpaidRentAmount,
       paidGasAmount,
       paidNetRentAfterGas,
@@ -1150,6 +1156,7 @@ export default function App() {
   }, [rents, approvedGasExpenses, currentUser, reportScope, selectedDriverId, startDate, endDate]);
 
   // Overall Admin Totals (Only approved gas expenses count in Gas Expense)
+  // Unpaid Total Rents = Unpaid rents (after 25% commission) minus all approved gas expenses
   const overallTotals = useMemo(() => {
     const totalRents = rents.reduce((sum, r) => sum + (Number(r.totalFare) || 0), 0);
     const totalCommission = rents.reduce((sum, r) => sum + (Number(r.driverCommission) || 0), 0);
@@ -1160,9 +1167,11 @@ export default function App() {
     const paidTotalRents = rents
       .filter((r) => Boolean(r.isPaid))
       .reduce((sum, r) => sum + getRentNetAfterCommission(r), 0);
-    const unpaidTotalRents = rents
+    const unpaidRentsAfterCommission = rents
       .filter((r) => !r.isPaid)
       .reduce((sum, r) => sum + getRentNetAfterCommission(r), 0);
+
+    const unpaidTotalRents = unpaidRentsAfterCommission - totalGas;
 
     const paidTotalGas = approvedGasExpenses
       .filter((g) => Boolean(g.isPaid))
@@ -1177,6 +1186,7 @@ export default function App() {
       totalGas,
       netOwnerProfit,
       paidTotalRents,
+      unpaidRentsAfterCommission,
       unpaidTotalRents,
       paidTotalGas,
       paidNetRentAfterGas
@@ -2225,7 +2235,7 @@ export default function App() {
                 )}
               </div>
 
-              {/* Paid (after 25% commission & Paid gas deducted) vs Unpaid Summary Cards */}
+              {/* Paid (after 25% commission & Paid gas deducted) vs Unpaid (after 25% commission & Approved gas deducted) Summary Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
                 <div className="p-3.5 rounded-xl bg-emerald-50/80 border border-emerald-200 flex items-center justify-between gap-2">
                   <div>
@@ -2246,11 +2256,12 @@ export default function App() {
                 <div className="p-3.5 rounded-xl bg-rose-50/80 border border-rose-200 flex items-center justify-between gap-2">
                   <div>
                     <div className="text-xs font-semibold text-rose-800">
-                      বাকি ভাড়া (Unpaid • ২৫% কমিশন বাদে)
+                      বাকি ভাড়া (Unpaid • ২৫% ও গ্যাস বাদে)
                     </div>
                     <div className="text-[11px] text-rose-700/80 mt-0.5">
-                      {filteredSummary.unpaidRents.length}টি ট্রিপ • মোট ভাড়া:{' '}
-                      {formatBDT(filteredSummary.unpaidRentGrossAmount)}
+                      {filteredSummary.unpaidRents.length}টি ট্রিপ • ২৫% বাদে:{' '}
+                      {formatBDT(filteredSummary.unpaidRentAfterCommission)} − গ্যাস:{' '}
+                      {formatBDT(filteredSummary.totalGasAmount)}
                     </div>
                   </div>
                   <div className="text-base sm:text-lg font-bold text-rose-700">
@@ -2566,7 +2577,7 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Paid (after 25% commission & Paid gas deducted) vs Unpaid Rent Cards */}
+                {/* Paid (after 25% commission & Paid gas deducted) vs Unpaid (after 25% commission & Approved gas deducted) Rent Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="bg-emerald-50/80 p-4 rounded-2xl border border-emerald-200 flex items-center justify-between">
                     <div>
@@ -2586,10 +2597,11 @@ export default function App() {
                   <div className="bg-rose-50/80 p-4 rounded-2xl border border-rose-200 flex items-center justify-between">
                     <div>
                       <div className="text-xs font-semibold text-rose-800">
-                        মোট বাকি ভাড়া (Unpaid • ২৫% বাদে)
+                        মোট বাকি ভাড়া (Unpaid • ২৫% ও গ্যাস বাদে)
                       </div>
                       <div className="text-[11px] text-rose-700 mt-0.5">
-                        ড্রাইভারের ২৫% কমিশন বাদে বাকি থাকা টাকা
+                        ২৫% বাদে {formatBDT(overallTotals.unpaidRentsAfterCommission)} − গ্যাস{' '}
+                        {formatBDT(overallTotals.totalGas)}
                       </div>
                     </div>
                     <div className="text-lg sm:text-xl font-bold text-rose-700">
