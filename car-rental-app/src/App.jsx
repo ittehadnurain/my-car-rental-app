@@ -935,7 +935,7 @@ export default function App() {
               <Car className="w-6 h-6 sm:w-7 sm:h-7 text-emerald-400" />
             </div>
             <h1 className="text-lg sm:text-xl font-bold tracking-tight">
-              গাড়ি ভাড়া ও ড্রাইভার হিসাব ব্যবস্থাপনা
+              হাশেম কার রেন্টাল
             </h1>
             <p className="text-xs text-slate-400 mt-1">
               মোবাইল ও কম্পিউটারের জন্য সহজ হিসাব প্যানেল
