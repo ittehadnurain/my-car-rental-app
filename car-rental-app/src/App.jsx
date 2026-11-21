@@ -143,10 +143,10 @@ const getRentNetAfterCommission = (rent) => {
   return +(gross * 0.75).toFixed(2);
 };
 
-// If approvalStatus is not explicitly set (legacy records), treat as approved
+// Strictly require explicit approvalStatus === 'approved' to count as approved
 const getGasApprovalStatus = (gas) => {
-  if (!gas) return 'approved';
-  return gas.approvalStatus || 'approved';
+  if (!gas || !gas.approvalStatus) return 'pending';
+  return gas.approvalStatus;
 };
 
 const compressImageToBase64 = (file, maxWidth = 800, quality = 0.65) => {
@@ -744,7 +744,7 @@ export default function App() {
     }
   };
 
-  // Submit Gas Expense Entry (Starts as 'pending' until Admin approves)
+  // Submit Gas Expense Entry (Always starts as 'pending' — never auto-approved)
   const handleGasSubmit = async (e) => {
     e.preventDefault();
     const targetDriverId = currentUser?.role === 'driver' ? currentUser.driverId : selectedDriverId;
@@ -766,7 +766,6 @@ export default function App() {
     setIsSubmittingGas(true);
     const stationObj = stations.find((s) => s.id === selectedStationId);
     const driverObj = drivers.find((d) => d.id === targetDriverId);
-    const initialApproval = currentUser?.role === 'admin' ? 'approved' : 'pending';
 
     const gasPayload = {
       driverId: targetDriverId,
@@ -777,9 +776,9 @@ export default function App() {
       receiptImage: receiptBase64,
       receiptFileName: receiptFileName || 'receipt.jpg',
       expenseDate: gasDate,
-      approvalStatus: initialApproval,
-      approvedAt: initialApproval === 'approved' ? new Date().toISOString() : null,
-      approvedBy: initialApproval === 'approved' ? currentUser?.name || 'Admin' : null,
+      approvalStatus: 'pending',
+      approvedAt: null,
+      approvedBy: null,
       isPaid: false,
       paidAt: null,
       locked: true,
@@ -795,16 +794,12 @@ export default function App() {
         setGasExpenses((prev) => [{ id: 'GAS-' + Date.now(), ...gasPayload }, ...prev]);
       }
       await writeAuditLog(
-        `নতুন গ্যাস খরচ সাবমিট (${targetDriverId}) [${initialApproval.toUpperCase()}]: ${
+        `নতুন গ্যাস খরচ সাবমিট (${targetDriverId}) [PENDING]: ${
           stationObj?.name || ''
         }, পরিমাণ: ${formatBDT(amountNum)}`,
         currentUser?.name || targetDriverId
       );
-      showToast(
-        initialApproval === 'approved'
-          ? 'গ্যাস খরচ অনুমোদিত হয়ে সংরক্ষিত হয়েছে!'
-          : 'গ্যাস খরচ অ্যাডমিনের অনুমোদনের জন্য পাঠানো হয়েছে!'
-      );
+      showToast('গ্যাস খরচ Pending অবস্থায় সেভ হয়েছে। অ্যাডমিন Approve করলে গ্যাস খরচে যুক্ত হবে।');
       setGasAmount('');
       setReceiptBase64('');
       setReceiptFileName('');
