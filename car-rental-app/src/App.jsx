@@ -40,8 +40,7 @@ import {
   Check,
   AlertCircle,
   Camera,
-  MessageCircle,
-  RotateCcw
+  MessageCircle
 } from 'lucide-react';
 
 // ==========================================
@@ -233,7 +232,6 @@ export default function App() {
   // Navigation & UI States
   const [activeTab, setActiveTab] = useState('rent');
   const [adminSubTab, setAdminSubTab] = useState('overview');
-  const [driverGasFilter, setDriverGasFilter] = useState('all');
   const [toast, setToast] = useState(null);
   const [receiptModalUrl, setReceiptModalUrl] = useState(null);
   const [editingRent, setEditingRent] = useState(null);
@@ -442,59 +440,6 @@ export default function App() {
   const numericFare = parseFloat(totalFare) || 0;
   const calculatedCommission = +(numericFare * 0.25).toFixed(2);
   const calculatedRemainingFare = +(numericFare - calculatedCommission).toFixed(2);
-
-  // Driver quick routes from recent rents
-  const driverQuickRoutes = useMemo(() => {
-    if (currentUser?.role !== 'driver') return [];
-    const seen = new Set();
-    const routes = [];
-    for (const r of rents) {
-      if (r.driverId !== currentUser.driverId) continue;
-      const key = `${(r.pickupLocation || '').trim().toLowerCase()}|${(r.dropLocation || '')
-        .trim()
-        .toLowerCase()}|${r.tripType || 'one-way'}`;
-      if (!seen.has(key) && r.pickupLocation && r.dropLocation) {
-        seen.add(key);
-        routes.push({
-          pickupLocation: r.pickupLocation,
-          dropLocation: r.dropLocation,
-          tripType: r.tripType || 'one-way',
-          totalFare: r.totalFare || ''
-        });
-      }
-      if (routes.length >= 4) break;
-    }
-    return routes;
-  }, [rents, currentUser]);
-
-  // Driver personal commission & gas stats
-  const driverStats = useMemo(() => {
-    if (currentUser?.role !== 'driver') return null;
-    const myRents = rents.filter((r) => r.driverId === currentUser.driverId);
-    const myGas = gasExpenses.filter((g) => g.driverId === currentUser.driverId);
-
-    const totalCommission = myRents.reduce((sum, r) => sum + (Number(r.driverCommission) || 0), 0);
-    const paidCommission = myRents
-      .filter((r) => Boolean(r.isPaid))
-      .reduce((sum, r) => sum + (Number(r.driverCommission) || 0), 0);
-    const unpaidCommission = +(totalCommission - paidCommission).toFixed(2);
-
-    const pendingGas = myGas.filter((g) => getGasApprovalStatus(g) === 'pending');
-    const approvedGas = myGas.filter((g) => getGasApprovalStatus(g) === 'approved');
-    const rejectedGas = myGas.filter((g) => getGasApprovalStatus(g) === 'rejected');
-
-    return {
-      tripsCount: myRents.length,
-      totalCommission,
-      paidCommission,
-      unpaidCommission,
-      pendingGasCount: pendingGas.length,
-      pendingGasTotal: pendingGas.reduce((sum, g) => sum + (Number(g.amount) || 0), 0),
-      approvedGasCount: approvedGas.length,
-      approvedGasTotal: approvedGas.reduce((sum, g) => sum + (Number(g.amount) || 0), 0),
-      rejectedGasCount: rejectedGas.length
-    };
-  }, [rents, gasExpenses, currentUser]);
 
   // Login Handlers
   const handleDriverLogin = (e) => {
@@ -1752,44 +1697,6 @@ export default function App() {
           </div>
         )}
 
-        {/* Driver Quick Commission & Gas Status Strip */}
-        {isDriver && driverStats && (
-          <div className="no-print grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mb-5">
-            <div className="bg-white rounded-xl border border-emerald-200 p-3 shadow-xs">
-              <div className="text-[11px] font-semibold text-emerald-700">মোট কমিশন (২৫%)</div>
-              <div className="text-base sm:text-lg font-bold text-slate-900 mt-0.5">
-                {formatBDT(driverStats.totalCommission)}
-              </div>
-              <div className="text-[10px] text-slate-500">{driverStats.tripsCount}টি ট্রিপ</div>
-            </div>
-            <div className="bg-white rounded-xl border border-rose-200 p-3 shadow-xs">
-              <div className="text-[11px] font-semibold text-rose-700">বাকি কমিশন (Unpaid)</div>
-              <div className="text-base sm:text-lg font-bold text-rose-700 mt-0.5">
-                {formatBDT(driverStats.unpaidCommission)}
-              </div>
-              <div className="text-[10px] text-emerald-700">
-                Paid: {formatBDT(driverStats.paidCommission)}
-              </div>
-            </div>
-            <div className="bg-white rounded-xl border border-amber-200 p-3 shadow-xs">
-              <div className="text-[11px] font-semibold text-amber-800">গ্যাস Pending</div>
-              <div className="text-base sm:text-lg font-bold text-amber-800 mt-0.5">
-                {driverStats.pendingGasCount}টি ({formatBDT(driverStats.pendingGasTotal)})
-              </div>
-              <div className="text-[10px] text-slate-500">অ্যাডমিন অনুমোদনের অপেক্ষায়</div>
-            </div>
-            <div className="bg-white rounded-xl border border-slate-200 p-3 shadow-xs">
-              <div className="text-[11px] font-semibold text-slate-600">গ্যাস Approved</div>
-              <div className="text-base sm:text-lg font-bold text-emerald-700 mt-0.5">
-                {driverStats.approvedGasCount}টি ({formatBDT(driverStats.approvedGasTotal)})
-              </div>
-              <div className="text-[10px] text-slate-500">
-                Rejected: {driverStats.rejectedGasCount}টি
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* ============================================================ */}
         {/* TAB 1: RENT INPUT SYSTEM (DRIVER ACCOUNT)                    */}
         {/* ============================================================ */}
@@ -1810,36 +1717,6 @@ export default function App() {
                   ২৫% কমিশন অটো হিসাব
                 </span>
               </div>
-
-              {/* Driver Recent Routes Quick-Fill */}
-              {driverQuickRoutes.length > 0 && (
-                <div className="mb-4 p-3 rounded-xl bg-slate-50 border border-slate-200/80">
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="text-[11px] font-bold text-slate-600 flex items-center gap-1">
-                      <RotateCcw className="w-3.5 h-3.5 text-emerald-600" />
-                      আপনার সাম্প্রতিক রুট (এক ক্লিকে পূরণ করুন):
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {driverQuickRoutes.map((rt, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => {
-                          setPickupLocation(rt.pickupLocation);
-                          setDropLocation(rt.dropLocation);
-                          setTripType(rt.tripType);
-                          if (rt.totalFare) setTotalFare(String(rt.totalFare));
-                          showToast('রুট তথ্য ফর্মে বসানো হয়েছে');
-                        }}
-                        className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-xs font-semibold text-slate-700 transition text-left"
-                      >
-                        {rt.pickupLocation} → {rt.dropLocation}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               <form onSubmit={handleRentSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
@@ -2006,56 +1883,43 @@ export default function App() {
                 {rents
                   .filter((r) => r.driverId === currentUser.driverId)
                   .slice(0, 8)
-                  .map((r) => {
-                    const cleanPhone = String(r.passengerPhone || '').replace(/\D/g, '');
-                    return (
-                      <div
-                        key={r.id}
-                        className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/80"
-                      >
-                        <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
-                          <span className="flex items-center gap-1.5">
-                            {r.rentDate}
-                            <Lock className="w-3 h-3 text-slate-400" />
-                            <span
-                              className={`px-2 py-0.5 rounded-full font-semibold ${
-                                r.isPaid
-                                  ? 'bg-emerald-100 text-emerald-700'
-                                  : 'bg-amber-100 text-amber-800'
-                              }`}
-                            >
-                              {r.isPaid ? 'Paid' : 'Unpaid'}
-                            </span>
+                  .map((r) => (
+                    <div
+                      key={r.id}
+                      className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/80"
+                    >
+                      <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+                        <span className="flex items-center gap-1.5">
+                          {r.rentDate}
+                          <Lock className="w-3 h-3 text-slate-400" />
+                          <span
+                            className={`px-2 py-0.5 rounded-full font-semibold ${
+                              r.isPaid
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : 'bg-amber-100 text-amber-800'
+                            }`}
+                          >
+                            {r.isPaid ? 'Paid' : 'Unpaid'}
                           </span>
-                          <span className="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-                            {r.tripType === 'round-trip' ? 'আসা-যাওয়া' : 'শুধু যাওয়া'}
-                          </span>
-                        </div>
-                        <div className="font-semibold text-sm text-slate-800">
-                          {r.pickupLocation} → {r.dropLocation}
-                        </div>
-                        <div className="flex items-center justify-between gap-2 text-xs text-slate-500 mt-1">
-                          <span>যাত্রী: {r.passengerPhone}</span>
-                          {cleanPhone && (
-                            <a
-                              href={`tel:${cleanPhone}`}
-                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold"
-                            >
-                              <Phone className="w-3 h-3" /> কল
-                            </a>
-                          )}
-                        </div>
-                        <div className="mt-2 pt-2 border-t border-slate-200/70 flex items-center justify-between text-xs">
-                          <span>
-                            মোট: <strong>{formatBDT(r.totalFare)}</strong>
-                          </span>
-                          <span className="text-emerald-700 font-bold">
-                            কমিশন: {formatBDT(r.driverCommission)}
-                          </span>
-                        </div>
+                        </span>
+                        <span className="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
+                          {r.tripType === 'round-trip' ? 'আসা-যাওয়া' : 'শুধু যাওয়া'}
+                        </span>
                       </div>
-                    );
-                  })}
+                      <div className="font-semibold text-sm text-slate-800">
+                        {r.pickupLocation} → {r.dropLocation}
+                      </div>
+                      <div className="text-xs text-slate-500 mt-1">যাত্রী: {r.passengerPhone}</div>
+                      <div className="mt-2 pt-2 border-t border-slate-200/70 flex items-center justify-between text-xs">
+                        <span>
+                          মোট: <strong>{formatBDT(r.totalFare)}</strong>
+                        </span>
+                        <span className="text-emerald-700 font-bold">
+                          কমিশন: {formatBDT(r.driverCommission)}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 {rents.filter((r) => r.driverId === currentUser.driverId).length === 0 && (
                   <div className="text-center py-8 text-slate-400 text-sm">
                     আপনার এখনো কোনো ভাড়ার এন্ট্রি নেই।
@@ -2202,44 +2066,16 @@ export default function App() {
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5">
-              <div className="flex items-center justify-between gap-2 mb-2.5">
-                <h3 className="font-bold text-slate-900 text-sm sm:text-base">
-                  আপনার গ্যাস খরচের তালিকা
-                </h3>
-                <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
+              <h3 className="font-bold text-slate-900 mb-3 flex items-center justify-between text-sm sm:text-base">
+                <span>আপনার গ্যাস খরচের তালিকা</span>
+                <span className="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">
                   {gasExpenses.filter((g) => g.driverId === currentUser.driverId).length}টি
                 </span>
-              </div>
+              </h3>
 
-              <div className="grid grid-cols-4 gap-1 mb-3 bg-slate-100 p-1 rounded-xl text-[11px] font-bold">
-                {[
-                  { id: 'all', label: 'সব' },
-                  { id: 'pending', label: 'Pending' },
-                  { id: 'approved', label: 'Approved' },
-                  { id: 'rejected', label: 'Rejected' }
-                ].map((flt) => (
-                  <button
-                    key={flt.id}
-                    type="button"
-                    onClick={() => setDriverGasFilter(flt.id)}
-                    className={`py-1.5 rounded-lg transition ${
-                      driverGasFilter === flt.id
-                        ? 'bg-white text-slate-900 shadow-2xs'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    {flt.label}
-                  </button>
-                ))}
-              </div>
-
-              <div className="space-y-3 max-h-[420px] overflow-y-auto pr-0.5">
+              <div className="space-y-3 max-h-[480px] overflow-y-auto pr-0.5">
                 {gasExpenses
-                  .filter(
-                    (g) =>
-                      g.driverId === currentUser.driverId &&
-                      (driverGasFilter === 'all' || getGasApprovalStatus(g) === driverGasFilter)
-                  )
+                  .filter((g) => g.driverId === currentUser.driverId)
                   .slice(0, 10)
                   .map((g) => {
                     const approval = getGasApprovalStatus(g);
@@ -2288,13 +2124,9 @@ export default function App() {
                       </div>
                     );
                   })}
-                {gasExpenses.filter(
-                  (g) =>
-                    g.driverId === currentUser.driverId &&
-                    (driverGasFilter === 'all' || getGasApprovalStatus(g) === driverGasFilter)
-                ).length === 0 && (
+                {gasExpenses.filter((g) => g.driverId === currentUser.driverId).length === 0 && (
                   <div className="text-center py-8 text-slate-400 text-sm">
-                    এই ক্যাটাগরিতে কোনো গ্যাস খরচের রেকর্ড নেই।
+                    আপনার এখনো কোনো গ্যাস খরচের রেকর্ড নেই।
                   </div>
                 )}
               </div>
