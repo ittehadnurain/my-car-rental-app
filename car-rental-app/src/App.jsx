@@ -1778,37 +1778,35 @@ export default function App() {
                 </div>
 
                 <div className="md:col-span-4 grid grid-cols-2 gap-2.5">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">
-                      শুরুর তারিখ
-                    </label>
-                    <input
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => {
-                        setDatePreset('custom');
-                        setStartDate(e.target.value);
-                      }}
-                      className="w-full px-2.5 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">
-                      শেষ তারিখ
-                    </label>
-                    <input
-                      type="date"
-                      value={endDate}
-                      onChange={(e) => {
-                        setDatePreset('custom');
-                        setEndDate(e.target.value);
-                      }}
-                      className="w-full px-2.5 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
+  <div>
+    <label className="block text-xs font-semibold text-slate-600 mb-1">
+      শুরুর তারিখ
+    </label>
+    <input
+      type="date"
+      value={startDate}
+      onChange={(e) => {
+        setDatePreset('custom');
+        setStartDate(e.target.value);
+      }}
+      className="w-full px-2.5 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm"
+    />
+  </div>
+  <div>
+    <label className="block text-xs font-semibold text-slate-600 mb-1">
+      শেষ তারিখ
+    </label>
+    <input
+      type="date"
+      value={endDate}
+      onChange={(e) => {
+        setDatePreset('custom');
+        setEndDate(e.target.value);
+      }}
+      className="w-full px-2.5 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm"
+    />
+  </div>
+</div>
 
             {/* Report Sheet */}
             <div className="print-card bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6">
