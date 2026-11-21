@@ -83,6 +83,12 @@ const ADMIN_USERS = [
     phone: '01858050997',
     password: '01858050997',
     name: 'Kamrun Nahar'
+  },
+   {
+    email: '',
+    phone: '01911790677',
+    password: '01911790677',
+    name: 'Kamrun Nahar'
   }
 ];
 
