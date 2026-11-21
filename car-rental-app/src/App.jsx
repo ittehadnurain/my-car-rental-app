@@ -40,7 +40,8 @@ import {
   Check,
   AlertCircle,
   Camera,
-  MessageCircle
+  MessageCircle,
+  Globe
 } from 'lucide-react';
 
 // ==========================================
@@ -59,8 +60,376 @@ const firebaseConfig = {
 const ADMIN_WHATSAPP_NUMBER = '8801877695700';
 
 // শুধুমাত্র ড্রাইভার আইডির হেডারের নিচে দেখানোর স্ক্রলিং সতর্কতা বার্তা
-const DRIVER_SAFETY_SCROLL_TEXT =
-  'একটি দুর্ঘটনা সারা জীবনের কান্না | ড্রাইভিং এর সময় অতিরিক্ত গতি পরিহার করুন | সাবধানে গাড়ি চালান, জীবন বাঁচান | গাড়ি চালানোর সময় ফোন এড়িয়ে চলুন';
+const DRIVER_SAFETY_SCROLL_TEXT = {
+  bn: 'একটি দুর্ঘটনা সারা জীবনের কান্না | ড্রাইভিং এর সময় অতিরিক্ত গতি পরিহার করুন | সাবধানে গাড়ি চালান, জীবন বাঁচান | গাড়ি চালানোর সময় ফোন এড়িয়ে চলুন',
+  en: 'One accident means a lifetime of sorrow | Avoid speeding while driving | Drive safely, save lives | Avoid using your phone while driving'
+};
+
+// ==========================================
+// 2. TRANSLATIONS (BANGLA DEFAULT + ENGLISH)
+// ==========================================
+const TRANSLATIONS = {
+  bn: {
+    brandName: 'হাশেম কার রেন্টাল',
+    developedBy: 'Developed by Ittehad Nur',
+    driverLogin: 'ড্রাইভার লগইন',
+    adminLogin: 'অ্যাডমিন লগইন',
+    driverIdOrPhoneLabel: 'ড্রাইভার আইডি বা মোবাইল নম্বর *',
+    driverIdOrPhonePlaceholder: 'যেমন: DRV-01 বা 017XXXXXXXX',
+    pinLabel: 'পিন (PIN) *',
+    pinPlaceholder: 'আপনার পিন নম্বর দিন',
+    enterDriverPanel: 'ড্রাইভার প্যানেলে প্রবেশ করুন',
+    adminEmailOrPhoneLabel: 'অ্যাডমিন ইমেইল বা মোবাইল নম্বর *',
+    adminEmailOrPhonePlaceholder: 'ইমেইল বা 018XXXXXXXX দিন',
+    passwordLabel: 'পাসওয়ার্ড *',
+    passwordPlaceholder: 'পাসওয়ার্ড দিন',
+    enterAdminPanel: 'অ্যাডমিন প্যানেলে প্রবেশ করুন',
+    adminBadge: 'অ্যাডমিন',
+    logout: 'লগ আউট',
+    navRentInput: 'রেন্ট ইনপুট',
+    navGasInput: 'গ্যাস-খরচ ইনপুট',
+    navGasShort: 'গ্যাস খরচ',
+    navMySummary: 'আমার সামারি রিপোর্ট',
+    navSummaryShort: 'সামারি',
+    navMasterAdmin: 'মাস্টার অ্যাডমিন প্যানেল',
+    navAdminShort: 'অ্যাডমিন প্যানেল',
+    navSummaryPdf: 'সামারি ও PDF রিপোর্ট',
+    navReportShort: 'রিপোর্ট',
+    loadingData: 'ডাটাবেজ থেকে তথ্য লোড হচ্ছে...',
+    newRentTitle: 'নতুন রেন্ট (ভাড়া) ইনপুট',
+    carLabel: 'গাড়ি:',
+    notAssigned: 'নির্ধারিত নয়',
+    lockedAfterSaveNote: 'সেভ হলে লক হয়ে যাবে',
+    autoCommissionBadge: '২৫% কমিশন অটো হিসাব',
+    pickupLabel: 'যাত্রা লোকেশন (Pickup) *',
+    pickupPlaceholder: 'যেমন: উত্তরা, ঢাকা',
+    dropLabel: 'গন্তব্য লোকেশন (Drop-off) *',
+    dropPlaceholder: 'যেমন: চট্টগ্রাম শহর',
+    totalFareLabel: 'মোট ভাড়া (টাকা) *',
+    totalFarePlaceholder: 'যেমন: ৫০০০',
+    passengerPhoneLabel: 'যাত্রীর মোবাইল নম্বর *',
+    rentDateLabel: 'ভাড়ার তারিখ *',
+    tripTypeLabel: 'ভাড়ার ধরন *',
+    oneWay: 'শুধু যাওয়া',
+    roundTrip: 'আসা-যাওয়া',
+    autoCalcTitle: 'স্বয়ংক্রিয় হিসাব (২৫% ড্রাইভার কমিশন)',
+    totalFareShort: 'মোট ভাড়া',
+    commission25: 'কমিশন (২৫%)',
+    remainingFare: 'অবশিষ্ট ভাড়া',
+    saving: 'সংরক্ষণ হচ্ছে...',
+    saveRentBtn: 'ভাড়ার হিসাব সেভ করুন',
+    yourRecentRents: 'আপনার সাম্প্রতিক ভাড়া',
+    countSuffix: 'টি',
+    passengerPrefix: 'যাত্রী:',
+    totalPrefix: 'মোট:',
+    commissionPrefix: 'কমিশন:',
+    noRentsYet: 'আপনার এখনো কোনো ভাড়ার এন্ট্রি নেই।',
+    gasInputTitle: 'গ্যাস-খরচ ইনপুট',
+    gasInputSub: 'সাবমিট করার পর অ্যাডমিন অনুমোদন করলে এটি গ্যাস খরচে যুক্ত হবে',
+    dateLabel: 'তারিখ *',
+    gasAmountLabel: 'গ্যাস খরচের পরিমাণ (টাকা) *',
+    gasAmountPlaceholder: 'যেমন: ১২০০',
+    selectStationLabel: 'গ্যাস ফিলিং স্টেশন সিলেক্ট করুন *',
+    selectStationDefault: '-- ফিলিং স্টেশন নির্বাচন করুন --',
+    noStationAdded: '-- কোনো স্টেশন যোগ করা হয়নি --',
+    addReceiptLabel: 'রিসিপ্ট এর ছবি এড করুন *',
+    captureOrGallery: 'রিসিপ্টের ছবি তুলুন বা গ্যালারি থেকে নিন',
+    selectFromCameraOrGallery: 'ফোন ক্যামেরা বা গ্যালারি থেকে ছবি সিলেক্ট করুন',
+    removeImage: 'ছবি মুছে ফেলুন',
+    uploading: 'আপলোড হচ্ছে...',
+    submitForApproval: 'অনুমোদনের জন্য পাঠান',
+    yourGasList: 'আপনার গ্যাস খরচের তালিকা',
+    receiptBtn: 'রিসিপ্ট',
+    noGasYet: 'আপনার এখনো কোনো গ্যাস খরচের রেকর্ড নেই।',
+    summaryReportSub: '৭, ১০, ১৫, ৩০ দিন বা কাস্টম তারিখে হিসাব দেখুন (Unpaid শেষ হলে বাকি গ্যাস Paid ভাড়া থেকে কাটা হয়)',
+    printPdfBtn: 'PDF / প্রিন্ট করুন',
+    reportScopeLabel: 'রিপোর্টের আওতা',
+    allDriversScope: 'সকল ড্রাইভার (সম্মিলিত)',
+    singleDriverScope: 'নির্দিষ্ট ড্রাইভার',
+    selectDriverLabel: 'ড্রাইভার নির্বাচন',
+    durationLabel: 'সময়কাল',
+    days7: '৭ দিন',
+    days10: '১০ দিন',
+    days15: '১৫ দিন',
+    days30: '৩০ দিন',
+    customRange: 'কাস্টম',
+    startDateLabel: 'শুরুর তারিখ',
+    endDateLabel: 'শেষ তারিখ',
+    statementHeader: 'হিসাব বিবরণী',
+    allDriversReportTitle: 'সকল ড্রাইভারের সামারি রিপোর্ট',
+    summaryPrefix: 'সামারি:',
+    periodPrefix: 'সময়কাল:',
+    toText: 'থেকে',
+    datePrefix: 'তারিখ:',
+    tripsLabel: 'ট্রিপ:',
+    approvedGasLabel: 'অনুমোদিত গ্যাস:',
+    myCommission25: 'আমার ২৫% কমিশন',
+    totalGasCost: 'মোট গ্যাস খরচ',
+    ownerNetIncome: 'মালিকের নিট আয়',
+    paidRentCardTitle: 'আদায়কৃত ভাড়া (Paid • ২৫% ও অবশিষ্ট গ্যাস বাদে)',
+    paidRentLabel: 'Paid ভাড়া:',
+    gasDeductedLabel: 'গ্যাস কাটা:',
+    unpaidRentCardTitle: 'বাকি ভাড়া (Unpaid • ২৫% ও অনুমোদিত গ্যাস বাদে)',
+    after25Label: '২৫% বাদে:',
+    rentDetailsTitle: 'ভাড়ার বিস্তারিত',
+    noRentInPeriod: 'এই সময়কালে কোনো ভাড়ার তথ্য নেই।',
+    driverCol: 'ড্রাইভার',
+    routeCol: 'যাত্রা → গন্তব্য',
+    typeCol: 'ধরন',
+    statusCol: 'স্ট্যাটাস',
+    passengerCol: 'যাত্রীর নম্বর',
+    approvedGasDetailsTitle: 'অনুমোদিত গ্যাস খরচের বিস্তারিত',
+    noGasInPeriod: 'এই সময়কালে কোনো অনুমোদিত গ্যাস খরচের তথ্য নেই।',
+    stationCol: 'গ্যাস ফিলিং স্টেশন',
+    amountCol: 'খরচের পরিমাণ',
+    viewBtn: 'দেখুন',
+    noneText: 'নেই',
+    tabOverview: 'ওভারভিউ',
+    tabRents: 'ভাড়া',
+    tabGas: 'গ্যাস',
+    tabDrivers: 'ড্রাইভার',
+    tabStations: 'স্টেশন',
+    tabSecurity: 'ব্যাকআপ ও রুলস',
+    grandTotalRent: 'সর্বমোট ভাড়া',
+    driversShare: 'ড্রাইভারদের অংশ',
+    approvedCountSuffix: 'টি অনুমোদিত',
+    pendingCountSuffix: 'টি পেন্ডিং',
+    after25AndGas: '২৫% ও অনুমোদিত গ্যাস বাদে',
+    totalPaidRentCard: 'মোট আদায়কৃত ভাড়া (Paid • ২৫% ও অবশিষ্ট গ্যাস বাদে)',
+    totalUnpaidRentCard: 'মোট বাকি ভাড়া (Unpaid • ২৫% ও অনুমোদিত গ্যাস বাদে)',
+    driverWiseSummary: 'ড্রাইভারভিত্তিক হিসাব',
+    noDriversYet: 'কোনো ড্রাইভার যুক্ত নেই। "ড্রাইভার" ট্যাব থেকে নতুন ড্রাইভার যোগ করুন।',
+    inactiveStatus: 'নিষ্ক্রিয়',
+    activeStatus: 'সক্রিয়',
+    carCol: 'গাড়ি',
+    allRentsList: 'সকল ভাড়ার তালিকা',
+    deselectAll: 'সব আনসিলেক্ট করুন',
+    selectAll: 'সব সিলেক্ট করুন',
+    markSelectedPaid: 'সিলেক্টেডগুলো Paid করুন',
+    markUnpaid: 'Unpaid করুন',
+    editBtn: 'এডিট',
+    deleteBtn: 'ডিলিট',
+    actionCol: 'অ্যাকশন',
+    allGasAndApproval: 'সকল গ্যাস খরচ ও অনুমোদন',
+    gasApprovalNote: 'অ্যাডমিন Approve করলেই গ্যাস খরচ হিসেবে যুক্ত হবে (সব ভাড়া Paid থাকলে Paid ভাড়া থেকে সমন্বয় হবে)',
+    approveBtn: 'Approve করুন',
+    rejectBtn: 'Reject করুন',
+    paidBtn: 'Paid করুন',
+    approvalCol: 'অনুমোদন',
+    paymentCol: 'পেমেন্ট',
+    viewReceiptBtn: 'রিসিপ্ট দেখুন',
+    noPhoto: 'ছবি নেই',
+    addNewDriverTitle: 'নতুন ড্রাইভার যুক্ত করুন',
+    driverIdLabel: 'ড্রাইভার আইডি *',
+    driverNameLabel: 'ড্রাইভারের নাম *',
+    mobileLabel: 'মোবাইল নম্বর *',
+    carNumberLabel: 'গাড়ির নম্বর',
+    loginPinLabel: 'লগইন পিন (কমপক্ষে ৪ ডিজিট) *',
+    saveDriverBtn: 'ড্রাইভার সেভ করুন',
+    registeredDriversTitle: 'নিবন্ধিত ড্রাইভার তালিকা',
+    pinShort: 'পিন',
+    unlockBtn: 'সক্রিয়',
+    lockBtn: 'লক',
+    addNewStationTitle: 'নতুন গ্যাস ফিলিং স্টেশন যোগ করুন',
+    stationNameLabel: 'ফিলিং স্টেশনের নাম *',
+    stationLocationLabel: 'এলাকা / ঠিকানা',
+    addStationBtn: 'স্টেশন যুক্ত করুন',
+    stationListTitle: 'গ্যাস ফিলিং স্টেশন তালিকা',
+    noStationsYet: 'কোনো গ্যাস স্টেশন নেই। বাম পাশ থেকে নতুন স্টেশন যোগ করুন।',
+    dbBackupTitle: 'ডাটাবেজ ব্যাকআপ ও সুরক্ষা',
+    downloadJsonBackup: 'JSON ব্যাকআপ ডাউনলোড',
+    recentAuditLogs: 'সাম্প্রতিক অডিট লগ',
+    copiedBtn: 'কপি হয়েছে',
+    copyBtn: 'কপি করুন',
+    gasReceiptModalTitle: 'গ্যাস রিসিপ্টের ছবি',
+    editRentModalTitle: 'ভাড়ার তথ্য এডিট করুন',
+    cancelBtn: 'বাতিল',
+    saveChangesBtn: 'আপডেট সেভ করুন',
+    resetPinModalTitle: 'ড্রাইভার পিন রিসেট',
+    newPinLabel: 'নতুন পিন (কমপক্ষে ৪ ডিজিট) *',
+    saveBtn: 'সংরক্ষণ করুন'
+  },
+  en: {
+    brandName: 'Hashem Car Rental',
+    developedBy: 'Developed by Ittehad Nur',
+    driverLogin: 'Driver Login',
+    adminLogin: 'Admin Login',
+    driverIdOrPhoneLabel: 'Driver ID or Mobile Number *',
+    driverIdOrPhonePlaceholder: 'e.g. DRV-01 or 017XXXXXXXX',
+    pinLabel: 'PIN *',
+    pinPlaceholder: 'Enter your PIN',
+    enterDriverPanel: 'Enter Driver Panel',
+    adminEmailOrPhoneLabel: 'Admin Email or Mobile Number *',
+    adminEmailOrPhonePlaceholder: 'Enter email or 018XXXXXXXX',
+    passwordLabel: 'Password *',
+    passwordPlaceholder: 'Enter password',
+    enterAdminPanel: 'Enter Admin Panel',
+    adminBadge: 'Admin',
+    logout: 'Logout',
+    navRentInput: 'Rent Input',
+    navGasInput: 'Gas Expense Input',
+    navGasShort: 'Gas Expense',
+    navMySummary: 'My Summary Report',
+    navSummaryShort: 'Summary',
+    navMasterAdmin: 'Master Admin Panel',
+    navAdminShort: 'Admin Panel',
+    navSummaryPdf: 'Summary & PDF Report',
+    navReportShort: 'Reports',
+    loadingData: 'Loading data from database...',
+    newRentTitle: 'New Rent (Trip) Input',
+    carLabel: 'Car:',
+    notAssigned: 'Not Assigned',
+    lockedAfterSaveNote: 'Locked after saving',
+    autoCommissionBadge: '25% Commission Auto Calc',
+    pickupLabel: 'Pickup Location *',
+    pickupPlaceholder: 'e.g. Uttara, Dhaka',
+    dropLabel: 'Drop-off Location *',
+    dropPlaceholder: 'e.g. Chattogram City',
+    totalFareLabel: 'Total Fare (BDT) *',
+    totalFarePlaceholder: 'e.g. 5000',
+    passengerPhoneLabel: 'Passenger Mobile Number *',
+    rentDateLabel: 'Rent Date *',
+    tripTypeLabel: 'Trip Type *',
+    oneWay: 'One-Way',
+    roundTrip: 'Round-Trip',
+    autoCalcTitle: 'Automatic Calculation (25% Driver Commission)',
+    totalFareShort: 'Total Fare',
+    commission25: 'Commission (25%)',
+    remainingFare: 'Remaining Fare',
+    saving: 'Saving...',
+    saveRentBtn: 'Save Rent Entry',
+    yourRecentRents: 'Your Recent Rents',
+    countSuffix: '',
+    passengerPrefix: 'Passenger:',
+    totalPrefix: 'Total:',
+    commissionPrefix: 'Commission:',
+    noRentsYet: 'You have no rent entries yet.',
+    gasInputTitle: 'Gas Expense Input',
+    gasInputSub: 'Added to gas expenses once approved by Admin',
+    dateLabel: 'Date *',
+    gasAmountLabel: 'Gas Expense Amount (BDT) *',
+    gasAmountPlaceholder: 'e.g. 1200',
+    selectStationLabel: 'Select Gas Filling Station *',
+    selectStationDefault: '-- Select Filling Station --',
+    noStationAdded: '-- No stations added yet --',
+    addReceiptLabel: 'Attach Receipt Photo *',
+    captureOrGallery: 'Take receipt photo or pick from gallery',
+    selectFromCameraOrGallery: 'Select image from camera or gallery',
+    removeImage: 'Remove image',
+    uploading: 'Uploading...',
+    submitForApproval: 'Submit for Approval',
+    yourGasList: 'Your Gas Expense List',
+    receiptBtn: 'Receipt',
+    noGasYet: 'You have no gas expense records yet.',
+    summaryReportSub: 'View 7, 10, 15, 30 days or custom dates (Remaining gas after Unpaid is deducted from Paid rent)',
+    printPdfBtn: 'Print / Save PDF',
+    reportScopeLabel: 'Report Scope',
+    allDriversScope: 'All Drivers (Combined)',
+    singleDriverScope: 'Single Driver',
+    selectDriverLabel: 'Select Driver',
+    durationLabel: 'Duration',
+    days7: '7 Days',
+    days10: '10 Days',
+    days15: '15 Days',
+    days30: '30 Days',
+    customRange: 'Custom',
+    startDateLabel: 'Start Date',
+    endDateLabel: 'End Date',
+    statementHeader: 'Account Statement',
+    allDriversReportTitle: 'All Drivers Summary Report',
+    summaryPrefix: 'Summary:',
+    periodPrefix: 'Period:',
+    toText: 'to',
+    datePrefix: 'Date:',
+    tripsLabel: 'Trips:',
+    approvedGasLabel: 'Approved Gas:',
+    myCommission25: 'My 25% Commission',
+    totalGasCost: 'Total Gas Expense',
+    ownerNetIncome: 'Owner Net Income',
+    paidRentCardTitle: 'Collected Rent (Paid • After 25% & Remaining Gas)',
+    paidRentLabel: 'Paid Rent:',
+    gasDeductedLabel: 'Gas Deducted:',
+    unpaidRentCardTitle: 'Unpaid Rent (Unpaid • After 25% & Approved Gas)',
+    after25Label: 'After 25%:',
+    rentDetailsTitle: 'Rent Details',
+    noRentInPeriod: 'No rent entries found for this period.',
+    driverCol: 'Driver',
+    routeCol: 'Pickup → Drop-off',
+    typeCol: 'Type',
+    statusCol: 'Status',
+    passengerCol: 'Passenger Phone',
+    approvedGasDetailsTitle: 'Approved Gas Expense Details',
+    noGasInPeriod: 'No approved gas expenses found for this period.',
+    stationCol: 'Gas Filling Station',
+    amountCol: 'Amount',
+    viewBtn: 'View',
+    noneText: 'None',
+    tabOverview: 'Overview',
+    tabRents: 'Rents',
+    tabGas: 'Gas',
+    tabDrivers: 'Drivers',
+    tabStations: 'Stations',
+    tabSecurity: 'Backup & Rules',
+    grandTotalRent: 'Grand Total Rent',
+    driversShare: 'Drivers Share',
+    approvedCountSuffix: ' Approved',
+    pendingCountSuffix: ' Pending',
+    after25AndGas: 'After 25% & Approved Gas',
+    totalPaidRentCard: 'Total Collected Rent (Paid • After 25% & Remaining Gas)',
+    totalUnpaidRentCard: 'Total Unpaid Rent (Unpaid • After 25% & Approved Gas)',
+    driverWiseSummary: 'Driver-Wise Summary',
+    noDriversYet: 'No drivers added yet. Add a new driver from the "Drivers" tab.',
+    inactiveStatus: 'Inactive',
+    activeStatus: 'Active',
+    carCol: 'Car',
+    allRentsList: 'All Rent Entries',
+    deselectAll: 'Deselect All',
+    selectAll: 'Select All',
+    markSelectedPaid: 'Mark Selected Paid',
+    markUnpaid: 'Mark Unpaid',
+    editBtn: 'Edit',
+    deleteBtn: 'Delete',
+    actionCol: 'Action',
+    allGasAndApproval: 'All Gas Expenses & Approval',
+    gasApprovalNote: 'Counted in gas expenses once approved by Admin (Remaining gas is adjusted from Paid rent when Unpaid is cleared)',
+    approveBtn: 'Approve',
+    rejectBtn: 'Reject',
+    paidBtn: 'Mark Paid',
+    approvalCol: 'Approval',
+    paymentCol: 'Payment',
+    viewReceiptBtn: 'View Receipt',
+    noPhoto: 'No Photo',
+    addNewDriverTitle: 'Add New Driver',
+    driverIdLabel: 'Driver ID *',
+    driverNameLabel: 'Driver Name *',
+    mobileLabel: 'Mobile Number *',
+    carNumberLabel: 'Car Number',
+    loginPinLabel: 'Login PIN (At least 4 digits) *',
+    saveDriverBtn: 'Save Driver',
+    registeredDriversTitle: 'Registered Drivers',
+    pinShort: 'PIN',
+    unlockBtn: 'Activate',
+    lockBtn: 'Lock',
+    addNewStationTitle: 'Add New Gas Filling Station',
+    stationNameLabel: 'Filling Station Name *',
+    stationLocationLabel: 'Area / Address',
+    addStationBtn: 'Add Station',
+    stationListTitle: 'Gas Filling Stations',
+    noStationsYet: 'No gas stations yet. Add a station from the left panel.',
+    dbBackupTitle: 'Database Backup & Security',
+    downloadJsonBackup: 'Download JSON Backup',
+    recentAuditLogs: 'Recent Audit Logs',
+    copiedBtn: 'Copied',
+    copyBtn: 'Copy',
+    gasReceiptModalTitle: 'Gas Receipt Photo',
+    editRentModalTitle: 'Edit Rent Entry',
+    cancelBtn: 'Cancel',
+    saveChangesBtn: 'Save Changes',
+    resetPinModalTitle: 'Reset Driver PIN',
+    newPinLabel: 'New PIN (At least 4 digits) *',
+    saveBtn: 'Save'
+  }
+};
 
 let db = null;
 let isFirebaseReady = false;
@@ -74,11 +443,8 @@ try {
 }
 
 // ==========================================
-// 2. SEED / DEFAULT DATA & ADMIN ACCOUNTS
+// 3. SEED / DEFAULT DATA & ADMIN ACCOUNTS
 // ==========================================
-const DEFAULT_DRIVERS = [];
-const DEFAULT_STATIONS = [];
-
 const ADMIN_USERS = [
   {
     email: 'ittehadnurain2007@gmail.com',
@@ -123,7 +489,7 @@ service cloud.firestore {
 }`;
 
 // ==========================================
-// 3. HELPER FUNCTIONS
+// 4. HELPER FUNCTIONS
 // ==========================================
 const formatBDT = (amount) => {
   const num = Number(amount) || 0;
@@ -209,9 +575,33 @@ const compressImageToBase64 = (file, maxWidth = 800, quality = 0.65) => {
 };
 
 // ==========================================
-// 4. MAIN APPLICATION COMPONENT
+// 5. MAIN APPLICATION COMPONENT
 // ==========================================
 export default function App() {
+  // Language State: Default Bangla ('bn'), toggleable to English ('en')
+  const [lang, setLang] = useState(() => {
+    try {
+      const savedLang = localStorage.getItem('rental_app_lang');
+      return savedLang === 'en' ? 'en' : 'bn';
+    } catch {
+      return 'bn';
+    }
+  });
+
+  const t = TRANSLATIONS[lang] || TRANSLATIONS.bn;
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('rental_app_lang', lang);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [lang]);
+
+  const toggleLanguage = () => {
+    setLang((prev) => (prev === 'bn' ? 'en' : 'bn'));
+  };
+
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const saved = localStorage.getItem('rental_session_user');
@@ -297,10 +687,14 @@ export default function App() {
     const cleanPhone = String(ADMIN_WHATSAPP_NUMBER || '').replace(/\D/g, '');
     const greetingText =
       currentUser?.role === 'driver'
-        ? `আসসালামু আলাইকুম, আমি ${currentUser.name} (${currentUser.driverId})।`
+        ? lang === 'en'
+          ? `Assalamu Alaikum, I am ${currentUser.name} (${currentUser.driverId}).`
+          : `আসসালামু আলাইকুম, আমি ${currentUser.name} (${currentUser.driverId})।`
+        : lang === 'en'
+        ? 'Assalamu Alaikum, contacting from Hashem Car Rental.'
         : 'আসসালামু আলাইকুম, হাশেম কার রেন্টাল থেকে যোগাযোগ করছি।';
     return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(greetingText)}`;
-  }, [currentUser]);
+  }, [currentUser, lang]);
 
   // Persist Session User
   useEffect(() => {
@@ -413,7 +807,12 @@ export default function App() {
       const matched = drivers.find((d) => d.id === currentUser.driverId);
       if (matched && matched.active === false) {
         setCurrentUser(null);
-        showToast('আপনার ড্রাইভার আইডি সাময়িকভাবে স্থগিত করা হয়েছে। অ্যাডমিনের সাথে যোগাযোগ করুন।', 'error');
+        showToast(
+          lang === 'en'
+            ? 'Your driver ID has been temporarily suspended. Please contact Admin.'
+            : 'আপনার ড্রাইভার আইডি সাময়িকভাবে স্থগিত করা হয়েছে। অ্যাডমিনের সাথে যোগাযোগ করুন।',
+          'error'
+        );
       } else if (matched) {
         setCurrentUser((prev) => ({
           ...prev,
@@ -423,7 +822,7 @@ export default function App() {
         }));
       }
     }
-  }, [drivers]);
+  }, [drivers, lang]);
 
   // Preset Date Handler
   const handlePresetChange = (preset) => {
@@ -455,12 +854,20 @@ export default function App() {
     );
 
     if (!foundDriver) {
-      setLoginError('ভুল ড্রাইভার আইডি/মোবাইল নম্বর অথবা পিন। অ্যাডমিন প্যানেল থেকে আইডি যাচাই করুন।');
+      setLoginError(
+        lang === 'en'
+          ? 'Invalid Driver ID/mobile number or PIN. Please verify with Admin.'
+          : 'ভুল ড্রাইভার আইডি/মোবাইল নম্বর অথবা পিন। অ্যাডমিন প্যানেল থেকে আইডি যাচাই করুন।'
+      );
       return;
     }
 
     if (foundDriver.active === false) {
-      setLoginError('এই ড্রাইভার আইডিটি বর্তমানে নিষ্ক্রিয় (Inactive) রয়েছে।');
+      setLoginError(
+        lang === 'en'
+          ? 'This driver ID is currently inactive.'
+          : 'এই ড্রাইভার আইডিটি বর্তমানে নিষ্ক্রিয় (Inactive) রয়েছে।'
+      );
       return;
     }
 
@@ -475,7 +882,7 @@ export default function App() {
     setDriverLoginId('');
     setDriverLoginPin('');
     writeAuditLog(`ড্রাইভার লগইন: ${foundDriver.name} (${foundDriver.id})`, foundDriver.name);
-    showToast(`স্বাগতম, ${foundDriver.name}!`);
+    showToast(lang === 'en' ? `Welcome, ${foundDriver.name}!` : `স্বাগতম, ${foundDriver.name}!`);
   };
 
   const handleAdminLogin = (e) => {
@@ -502,9 +909,15 @@ export default function App() {
       setAdminLoginEmail('');
       setAdminLoginPassword('');
       writeAuditLog(`অ্যাডমিন লগইন: ${matchedAdmin.name} (${matchedAdmin.phone})`, matchedAdmin.name);
-      showToast(`${matchedAdmin.name} প্যানেলে স্বাগতম!`);
+      showToast(
+        lang === 'en' ? `Welcome to ${matchedAdmin.name}'s panel!` : `${matchedAdmin.name} প্যানেলে স্বাগতম!`
+      );
     } else {
-      setLoginError('ভুল অ্যাডমিন ইমেইল/মোবাইল নম্বর বা পাসওয়ার্ড।');
+      setLoginError(
+        lang === 'en'
+          ? 'Invalid admin email/mobile number or password.'
+          : 'ভুল অ্যাডমিন ইমেইল/মোবাইল নম্বর বা পাসওয়ার্ড।'
+      );
     }
   };
 
@@ -516,7 +929,7 @@ export default function App() {
     setLoginError('');
     setSelectedRentIds([]);
     setSelectedGasIds([]);
-    showToast('সফলভাবে লগ আউট করা হয়েছে');
+    showToast(lang === 'en' ? 'Logged out successfully' : 'সফলভাবে লগ আউট করা হয়েছে');
   };
 
   // Submit Rent Entry
@@ -525,15 +938,24 @@ export default function App() {
     const targetDriverId = currentUser?.role === 'driver' ? currentUser.driverId : selectedDriverId;
 
     if (!pickupLocation.trim() || !dropLocation.trim()) {
-      showToast('যাত্রা ও গন্তব্য লোকেশন লিখুন', 'error');
+      showToast(
+        lang === 'en' ? 'Enter pickup and drop-off locations' : 'যাত্রা ও গন্তব্য লোকেশন লিখুন',
+        'error'
+      );
       return;
     }
     if (numericFare <= 0) {
-      showToast('সঠিক মোট ভাড়া (০-এর বেশি) লিখুন', 'error');
+      showToast(
+        lang === 'en' ? 'Enter a valid total fare greater than 0' : 'সঠিক মোট ভাড়া (০-এর বেশি) লিখুন',
+        'error'
+      );
       return;
     }
     if (!passengerPhone.trim()) {
-      showToast('যাত্রীর মোবাইল নম্বর দিন', 'error');
+      showToast(
+        lang === 'en' ? 'Enter passenger mobile number' : 'যাত্রীর মোবাইল নম্বর দিন',
+        'error'
+      );
       return;
     }
 
@@ -569,7 +991,9 @@ export default function App() {
         `নতুন ভাড়া এন্ট্রি (${targetDriverId}): ${pickupLocation.trim()} → ${dropLocation.trim()}, মোট: ${formatBDT(numericFare)}`,
         currentUser?.name || targetDriverId
       );
-      showToast('ভাড়ার হিসাব সফলভাবে সংরক্ষিত হয়েছে!');
+      showToast(
+        lang === 'en' ? 'Rent entry saved successfully!' : 'ভাড়ার হিসাব সফলভাবে সংরক্ষিত হয়েছে!'
+      );
       setPickupLocation('');
       setDropLocation('');
       setTotalFare('');
@@ -577,7 +1001,10 @@ export default function App() {
       setTripType('one-way');
     } catch (error) {
       console.error(error);
-      showToast('ডাটা সংরক্ষণে সমস্যা হয়েছে', 'error');
+      showToast(
+        lang === 'en' ? 'Failed to save data' : 'ডাটা সংরক্ষণে সমস্যা হয়েছে',
+        'error'
+      );
     } finally {
       setIsSubmittingRent(false);
     }
@@ -603,11 +1030,19 @@ export default function App() {
 
   const handleMarkRentsPaid = async (targetIds = selectedRentIds, nextPaidStatus = true) => {
     if (currentUser?.role !== 'admin') {
-      showToast('শুধুমাত্র অ্যাডমিন Paid স্ট্যাটাস আপডেট করতে পারবেন', 'error');
+      showToast(
+        lang === 'en'
+          ? 'Only Admin can update Paid status'
+          : 'শুধুমাত্র অ্যাডমিন Paid স্ট্যাটাস আপডেট করতে পারবেন',
+        'error'
+      );
       return;
     }
     if (!targetIds || targetIds.length === 0) {
-      showToast('আগে অন্তত একটি ভাড়া সিলেক্ট করুন', 'error');
+      showToast(
+        lang === 'en' ? 'Select at least one rent entry first' : 'আগে অন্তত একটি ভাড়া সিলেক্ট করুন',
+        'error'
+      );
       return;
     }
 
@@ -636,13 +1071,20 @@ export default function App() {
 
       setSelectedRentIds((prev) => prev.filter((id) => !targetIds.includes(id)));
       showToast(
-        nextPaidStatus
+        lang === 'en'
+          ? nextPaidStatus
+            ? `${targetIds.length} rent entry/entries marked as Paid`
+            : `${targetIds.length} rent entry/entries marked as Unpaid`
+          : nextPaidStatus
           ? `${targetIds.length}টি ভাড়ায় Paid ট্যাগ লাগানো হয়েছে`
           : `${targetIds.length}টি ভাড়া Unpaid করা হয়েছে`
       );
     } catch (err) {
       console.error(err);
-      showToast('Paid স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে', 'error');
+      showToast(
+        lang === 'en' ? 'Failed to update Paid status' : 'Paid স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে',
+        'error'
+      );
     }
   };
 
@@ -666,12 +1108,20 @@ export default function App() {
 
   const handleGasApprovalChange = async (targetIds, nextStatus) => {
     if (currentUser?.role !== 'admin') {
-      showToast('শুধুমাত্র অ্যাডমিন গ্যাস খরচ অনুমোদন করতে পারবেন', 'error');
+      showToast(
+        lang === 'en'
+          ? 'Only Admin can approve gas expenses'
+          : 'শুধুমাত্র অ্যাডমিন গ্যাস খরচ অনুমোদন করতে পারবেন',
+        'error'
+      );
       return;
     }
     const idsArray = Array.isArray(targetIds) ? targetIds : [targetIds];
     if (idsArray.length === 0) {
-      showToast('আগে অন্তত একটি গ্যাস খরচ সিলেক্ট করুন', 'error');
+      showToast(
+        lang === 'en' ? 'Select at least one gas expense first' : 'আগে অন্তত একটি গ্যাস খরচ সিলেক্ট করুন',
+        'error'
+      );
       return;
     }
 
@@ -706,7 +1156,13 @@ export default function App() {
 
       setSelectedGasIds((prev) => prev.filter((id) => !idsArray.includes(id)));
       showToast(
-        nextStatus === 'approved'
+        lang === 'en'
+          ? nextStatus === 'approved'
+            ? `${idsArray.length} gas expense(s) approved and added to Gas Expenses!`
+            : nextStatus === 'rejected'
+            ? `${idsArray.length} gas expense(s) rejected`
+            : `${idsArray.length} gas expense(s) set to Pending`
+          : nextStatus === 'approved'
           ? `${idsArray.length}টি গ্যাস খরচ অনুমোদিত হয়েছে এবং এখন গ্যাস খরচে গণনা হবে!`
           : nextStatus === 'rejected'
           ? `${idsArray.length}টি গ্যাস খরচ বাতিল (Rejected) করা হয়েছে`
@@ -714,18 +1170,29 @@ export default function App() {
       );
     } catch (err) {
       console.error(err);
-      showToast('অনুমোদন স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে', 'error');
+      showToast(
+        lang === 'en' ? 'Failed to update approval status' : 'অনুমোদন স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে',
+        'error'
+      );
     }
   };
 
   const handleMarkGasPaid = async (targetIds = selectedGasIds, nextPaidStatus = true) => {
     if (currentUser?.role !== 'admin') {
-      showToast('শুধুমাত্র অ্যাডমিন গ্যাস খরচের Paid স্ট্যাটাস আপডেট করতে পারবেন', 'error');
+      showToast(
+        lang === 'en'
+          ? 'Only Admin can update gas Paid status'
+          : 'শুধুমাত্র অ্যাডমিন গ্যাস খরচের Paid স্ট্যাটাস আপডেট করতে পারবেন',
+        'error'
+      );
       return;
     }
     const idsArray = Array.isArray(targetIds) ? targetIds : [targetIds];
     if (idsArray.length === 0) {
-      showToast('আগে অন্তত একটি গ্যাস খরচ সিলেক্ট করুন', 'error');
+      showToast(
+        lang === 'en' ? 'Select at least one gas expense first' : 'আগে অন্তত একটি গ্যাস খরচ সিলেক্ট করুন',
+        'error'
+      );
       return;
     }
 
@@ -754,13 +1221,20 @@ export default function App() {
 
       setSelectedGasIds((prev) => prev.filter((id) => !idsArray.includes(id)));
       showToast(
-        nextPaidStatus
+        lang === 'en'
+          ? nextPaidStatus
+            ? `${idsArray.length} gas expense(s) marked as Paid`
+            : `${idsArray.length} gas expense(s) marked as Unpaid`
+          : nextPaidStatus
           ? `${idsArray.length}টি গ্যাস খরচে Paid ট্যাগ লাগানো হয়েছে`
           : `${idsArray.length}টি গ্যাস খরচ Unpaid করা হয়েছে`
       );
     } catch (err) {
       console.error(err);
-      showToast('গ্যাস খরচের Paid স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে', 'error');
+      showToast(
+        lang === 'en' ? 'Failed to update gas Paid status' : 'গ্যাস খরচের Paid স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে',
+        'error'
+      );
     }
   };
 
@@ -770,7 +1244,10 @@ export default function App() {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      showToast('শুধুমাত্র ছবি (JPG, PNG, WEBP) আপলোড করুন', 'error');
+      showToast(
+        lang === 'en' ? 'Upload image files only (JPG, PNG, WEBP)' : 'শুধুমাত্র ছবি (JPG, PNG, WEBP) আপলোড করুন',
+        'error'
+      );
       return;
     }
 
@@ -778,10 +1255,10 @@ export default function App() {
       setReceiptFileName(file.name);
       const compressed = await compressImageToBase64(file, 800, 0.65);
       setReceiptBase64(compressed);
-      showToast('রিসিপ্টের ছবি প্রস্তুত হয়েছে');
+      showToast(lang === 'en' ? 'Receipt photo is ready' : 'রিসিপ্টের ছবি প্রস্তুত হয়েছে');
     } catch (err) {
       console.error(err);
-      showToast('ছবি প্রসেস করতে সমস্যা হয়েছে', 'error');
+      showToast(lang === 'en' ? 'Failed to process image' : 'ছবি প্রসেস করতে সমস্যা হয়েছে', 'error');
     }
   };
 
@@ -792,15 +1269,24 @@ export default function App() {
     const amountNum = parseFloat(gasAmount) || 0;
 
     if (!selectedStationId) {
-      showToast('গ্যাস ফিলিং স্টেশন সিলেক্ট করুন', 'error');
+      showToast(
+        lang === 'en' ? 'Select a gas filling station' : 'গ্যাস ফিলিং স্টেশন সিলেক্ট করুন',
+        'error'
+      );
       return;
     }
     if (amountNum <= 0) {
-      showToast('গ্যাস খরচের টাকার পরিমাণ লিখুন', 'error');
+      showToast(
+        lang === 'en' ? 'Enter a valid gas expense amount' : 'গ্যাস খরচের টাকার পরিমাণ লিখুন',
+        'error'
+      );
       return;
     }
     if (!receiptBase64) {
-      showToast('রিসিপ্টের ছবি সংযুক্ত করুন', 'error');
+      showToast(
+        lang === 'en' ? 'Attach a receipt photo' : 'রিসিপ্টের ছবি সংযুক্ত করুন',
+        'error'
+      );
       return;
     }
 
@@ -812,7 +1298,7 @@ export default function App() {
       driverId: targetDriverId,
       driverName: driverObj?.name || targetDriverId,
       stationId: selectedStationId,
-      stationName: stationObj?.name || 'অজানা স্টেশন',
+      stationName: stationObj?.name || (lang === 'en' ? 'Unknown Station' : 'অজানা স্টেশন'),
       amount: amountNum,
       receiptImage: receiptBase64,
       receiptFileName: receiptFileName || 'receipt.jpg',
@@ -841,14 +1327,19 @@ export default function App() {
         currentUser?.name || targetDriverId
       );
       showToast(
-        'গ্যাস খরচ Pending অবস্থায় সেভ হয়েছে। অ্যাডমিন Approve করলে গ্যাস খরচে যুক্ত হবে।'
+        lang === 'en'
+          ? 'Gas expense saved as Pending. It will be added once Admin approves.'
+          : 'গ্যাস খরচ Pending অবস্থায় সেভ হয়েছে। অ্যাডমিন Approve করলে গ্যাস খরচে যুক্ত হবে।'
       );
       setGasAmount('');
       setReceiptBase64('');
       setReceiptFileName('');
     } catch (error) {
       console.error(error);
-      showToast('গ্যাস খরচ সংরক্ষণে সমস্যা হয়েছে', 'error');
+      showToast(
+        lang === 'en' ? 'Failed to save gas expense' : 'গ্যাস খরচ সংরক্ষণে সমস্যা হয়েছে',
+        'error'
+      );
     } finally {
       setIsSubmittingGas(false);
     }
@@ -880,22 +1371,34 @@ export default function App() {
       setRents((prev) =>
         prev.map((item) => (item.id === editingRent.id ? { ...item, ...updatedFields } : item))
       );
-      await writeAuditLog(`অ্যাডমিন ভাড়া এডিট করেছেন: ID ${editingRent.id}, নতুন ভাড়া ${formatBDT(fare)}`, 'Admin');
-      showToast('ভাড়ার তথ্য আপডেট করা হয়েছে');
+      await writeAuditLog(
+        `অ্যাডমিন ভাড়া এডিট করেছেন: ID ${editingRent.id}, নতুন ভাড়া ${formatBDT(fare)}`,
+        'Admin'
+      );
+      showToast(lang === 'en' ? 'Rent entry updated' : 'ভাড়ার তথ্য আপডেট করা হয়েছে');
       setEditingRent(null);
     } catch (err) {
       console.error(err);
-      showToast('আপডেট করতে সমস্যা হয়েছে', 'error');
+      showToast(lang === 'en' ? 'Failed to update' : 'আপডেট করতে সমস্যা হয়েছে', 'error');
     }
   };
 
   // Admin: Delete Rent Entry
   const handleDeleteRent = async (rentId) => {
     if (currentUser?.role !== 'admin') {
-      showToast('শুধুমাত্র অ্যাডমিন ডাটা ডিলিট করতে পারবেন', 'error');
+      showToast(
+        lang === 'en'
+          ? 'Only Admin can delete data'
+          : 'শুধুমাত্র অ্যাডমিন ডাটা ডিলিট করতে পারবেন',
+        'error'
+      );
       return;
     }
-    if (!window.confirm('আপনি কি নিশ্চিতভাবে এই ভাড়ার হিসাবটি মুছে ফেলতে চান?')) return;
+    const confirmMsg =
+      lang === 'en'
+        ? 'Are you sure you want to delete this rent entry?'
+        : 'আপনি কি নিশ্চিতভাবে এই ভাড়ার হিসাবটি মুছে ফেলতে চান?';
+    if (!window.confirm(confirmMsg)) return;
     try {
       if (isFirebaseReady && db && !String(rentId).startsWith('LOCAL-')) {
         await deleteDoc(doc(db, 'rents', rentId));
@@ -903,20 +1406,29 @@ export default function App() {
       setRents((prev) => prev.filter((r) => r.id !== rentId));
       setSelectedRentIds((prev) => prev.filter((id) => id !== rentId));
       await writeAuditLog(`অ্যাডমিন ভাড়া ডিলিট করেছেন: ID ${rentId}`, 'Admin');
-      showToast('ভাড়ার রেকর্ড মুছে ফেলা হয়েছে');
+      showToast(lang === 'en' ? 'Rent entry deleted' : 'ভাড়ার রেকর্ড মুছে ফেলা হয়েছে');
     } catch (err) {
       console.error(err);
-      showToast('মুছতে সমস্যা হয়েছে', 'error');
+      showToast(lang === 'en' ? 'Failed to delete' : 'মুছতে সমস্যা হয়েছে', 'error');
     }
   };
 
   // Admin: Delete Gas Expense
   const handleDeleteGas = async (gasId) => {
     if (currentUser?.role !== 'admin') {
-      showToast('শুধুমাত্র অ্যাডমিন গ্যাস খরচ ডিলিট করতে পারবেন', 'error');
+      showToast(
+        lang === 'en'
+          ? 'Only Admin can delete gas expenses'
+          : 'শুধুমাত্র অ্যাডমিন গ্যাস খরচ ডিলিট করতে পারবেন',
+        'error'
+      );
       return;
     }
-    if (!window.confirm('আপনি কি নিশ্চিতভাবে এই গ্যাস খরচের রেকর্ডটি মুছে ফেলতে চান?')) return;
+    const confirmMsg =
+      lang === 'en'
+        ? 'Are you sure you want to delete this gas expense record?'
+        : 'আপনি কি নিশ্চিতভাবে এই গ্যাস খরচের রেকর্ডটি মুছে ফেলতে চান?';
+    if (!window.confirm(confirmMsg)) return;
     try {
       if (isFirebaseReady && db && !String(gasId).startsWith('GAS-')) {
         await deleteDoc(doc(db, 'gas_expenses', gasId));
@@ -924,10 +1436,10 @@ export default function App() {
       setGasExpenses((prev) => prev.filter((g) => g.id !== gasId));
       setSelectedGasIds((prev) => prev.filter((id) => id !== gasId));
       await writeAuditLog(`অ্যাডমিন গ্যাস খরচ ডিলিট করেছেন: ID ${gasId}`, 'Admin');
-      showToast('গ্যাস খরচের রেকর্ড মুছে ফেলা হয়েছে');
+      showToast(lang === 'en' ? 'Gas expense deleted' : 'গ্যাস খরচের রেকর্ড মুছে ফেলা হয়েছে');
     } catch (err) {
       console.error(err);
-      showToast('মুছতে সমস্যা হয়েছে', 'error');
+      showToast(lang === 'en' ? 'Failed to delete' : 'মুছতে সমস্যা হয়েছে', 'error');
     }
   };
 
@@ -936,12 +1448,20 @@ export default function App() {
     e.preventDefault();
     if (currentUser?.role !== 'admin') return;
     if (!newDriverId.trim() || !newDriverName.trim() || !newDriverPhone.trim()) {
-      showToast('ড্রাইভার আইডি, নাম ও মোবাইল নম্বর দিন', 'error');
+      showToast(
+        lang === 'en'
+          ? 'Enter Driver ID, Name and Mobile number'
+          : 'ড্রাইভার আইডি, নাম ও মোবাইল নম্বর দিন',
+        'error'
+      );
       return;
     }
     const cleanPin = (newDriverPin || '1234').trim();
     if (cleanPin.length < 4) {
-      showToast('পিন অন্তত ৪ ডিজিটের হতে হবে', 'error');
+      showToast(
+        lang === 'en' ? 'PIN must be at least 4 digits' : 'পিন অন্তত ৪ ডিজিটের হতে হবে',
+        'error'
+      );
       return;
     }
 
@@ -949,7 +1469,7 @@ export default function App() {
       id: newDriverId.trim().toUpperCase(),
       name: newDriverName.trim(),
       phone: newDriverPhone.trim(),
-      carNumber: newDriverCar.trim() || 'নির্ধারিত নয়',
+      carNumber: newDriverCar.trim() || (lang === 'en' ? 'Not Assigned' : 'নির্ধারিত নয়'),
       pin: cleanPin,
       active: true
     };
@@ -961,7 +1481,7 @@ export default function App() {
         setDrivers((prev) => [...prev, driverObj]);
       }
       await writeAuditLog(`নতুন ড্রাইভার যুক্ত: ${driverObj.name} (${driverObj.id})`, 'Admin');
-      showToast('নতুন ড্রাইভার যুক্ত করা হয়েছে');
+      showToast(lang === 'en' ? 'New driver added' : 'নতুন ড্রাইভার যুক্ত করা হয়েছে');
       setNewDriverId('');
       setNewDriverName('');
       setNewDriverPhone('');
@@ -969,7 +1489,10 @@ export default function App() {
       setNewDriverPin('1234');
     } catch (err) {
       console.error(err);
-      showToast('ড্রাইভার যুক্ত করতে সমস্যা হয়েছে', 'error');
+      showToast(
+        lang === 'en' ? 'Failed to add driver' : 'ড্রাইভার যুক্ত করতে সমস্যা হয়েছে',
+        'error'
+      );
     }
   };
 
@@ -988,10 +1511,17 @@ export default function App() {
         `ড্রাইভার স্ট্যাটাস পরিবর্তন (${drv.id}): ${nextActive ? 'Active' : 'Inactive'}`,
         'Admin'
       );
-      showToast(`${drv.name}-এর আইডি ${nextActive ? 'সক্রিয়' : 'নিষ্ক্রিয়'} করা হয়েছে`);
+      showToast(
+        lang === 'en'
+          ? `${drv.name}'s ID is now ${nextActive ? 'Active' : 'Inactive'}`
+          : `${drv.name}-এর আইডি ${nextActive ? 'সক্রিয়' : 'নিষ্ক্রিয়'} করা হয়েছে`
+      );
     } catch (err) {
       console.error(err);
-      showToast('স্ট্যাটাস পরিবর্তন করতে সমস্যা হয়েছে', 'error');
+      showToast(
+        lang === 'en' ? 'Failed to update status' : 'স্ট্যাটাস পরিবর্তন করতে সমস্যা হয়েছে',
+        'error'
+      );
     }
   };
 
@@ -1000,7 +1530,12 @@ export default function App() {
     e.preventDefault();
     if (!editingDriverPin || currentUser?.role !== 'admin') return;
     if (!newPinValue || newPinValue.trim().length < 4) {
-      showToast('কমপক্ষে ৪ ডিজিটের নতুন পিন দিন', 'error');
+      showToast(
+        lang === 'en'
+          ? 'Enter a new PIN with at least 4 digits'
+          : 'কমপক্ষে ৪ ডিজিটের নতুন পিন দিন',
+        'error'
+      );
       return;
     }
     const cleanPin = newPinValue.trim();
@@ -1011,13 +1546,23 @@ export default function App() {
       setDrivers((prev) =>
         prev.map((item) => (item.id === editingDriverPin.id ? { ...item, pin: cleanPin } : item))
       );
-      await writeAuditLog(`ড্রাইভার পিন রিসেট: ${editingDriverPin.name} (${editingDriverPin.id})`, 'Admin');
-      showToast(`${editingDriverPin.name}-এর নতুন পিন সেট হয়েছে`);
+      await writeAuditLog(
+        `ড্রাইভার পিন রিসেট: ${editingDriverPin.name} (${editingDriverPin.id})`,
+        'Admin'
+      );
+      showToast(
+        lang === 'en'
+          ? `New PIN set for ${editingDriverPin.name}`
+          : `${editingDriverPin.name}-এর নতুন পিন সেট হয়েছে`
+      );
       setEditingDriverPin(null);
       setNewPinValue('');
     } catch (err) {
       console.error(err);
-      showToast('পিন আপডেট করতে সমস্যা হয়েছে', 'error');
+      showToast(
+        lang === 'en' ? 'Failed to update PIN' : 'পিন আপডেট করতে সমস্যা হয়েছে',
+        'error'
+      );
     }
   };
 
@@ -1026,13 +1571,18 @@ export default function App() {
     e.preventDefault();
     if (currentUser?.role !== 'admin') return;
     if (!newStationName.trim()) {
-      showToast('গ্যাস ফিলিং স্টেশনের নাম দিন', 'error');
+      showToast(
+        lang === 'en'
+          ? 'Enter gas filling station name'
+          : 'গ্যাস ফিলিং স্টেশনের নাম দিন',
+        'error'
+      );
       return;
     }
     const stationObj = {
       id: 'STN-' + Date.now(),
       name: newStationName.trim(),
-      location: newStationLocation.trim() || 'বাংলাদেশ'
+      location: newStationLocation.trim() || (lang === 'en' ? 'Bangladesh' : 'বাংলাদেশ')
     };
     try {
       if (isFirebaseReady && db) {
@@ -1042,29 +1592,40 @@ export default function App() {
       }
       setSelectedStationId(stationObj.id);
       await writeAuditLog(`নতুন গ্যাস স্টেশন যুক্ত: ${stationObj.name}`, 'Admin');
-      showToast('নতুন গ্যাস ফিলিং স্টেশন যুক্ত হয়েছে');
+      showToast(
+        lang === 'en'
+          ? 'New gas filling station added'
+          : 'নতুন গ্যাস ফিলিং স্টেশন যুক্ত হয়েছে'
+      );
       setNewStationName('');
       setNewStationLocation('');
     } catch (err) {
       console.error(err);
-      showToast('স্টেশন যুক্ত করতে সমস্যা হয়েছে', 'error');
+      showToast(
+        lang === 'en' ? 'Failed to add station' : 'স্টেশন যুক্ত করতে সমস্যা হয়েছে',
+        'error'
+      );
     }
   };
 
   // Admin: Delete Gas Station
   const handleDeleteStation = async (stn) => {
     if (currentUser?.role !== 'admin') return;
-    if (!window.confirm(`"${stn.name}" স্টেশনটি মুছে ফেলতে চান?`)) return;
+    const confirmMsg =
+      lang === 'en'
+        ? `Delete station "${stn.name}"?`
+        : `"${stn.name}" স্টেশনটি মুছে ফেলতে চান?`;
+    if (!window.confirm(confirmMsg)) return;
     try {
       if (isFirebaseReady && db && stn.docId) {
         await deleteDoc(doc(db, 'stations', stn.docId));
       }
       setStations((prev) => prev.filter((item) => item.id !== stn.id));
       await writeAuditLog(`গ্যাস স্টেশন মুছে ফেলা হয়েছে: ${stn.name}`, 'Admin');
-      showToast('স্টেশন মুছে ফেলা হয়েছে');
+      showToast(lang === 'en' ? 'Station deleted' : 'স্টেশন মুছে ফেলা হয়েছে');
     } catch (err) {
       console.error(err);
-      showToast('মুছতে সমস্যা হয়েছে', 'error');
+      showToast(lang === 'en' ? 'Failed to delete' : 'মুছতে সমস্যা হয়েছে', 'error');
     }
   };
 
@@ -1100,13 +1661,21 @@ export default function App() {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
     writeAuditLog('সম্পূর্ণ ডাটাবেজ JSON ব্যাকআপ ডাউনলোড করা হয়েছে', 'Admin');
-    showToast('JSON ব্যাকআপ ফাইল ডাউনলোড হয়েছে');
+    showToast(
+      lang === 'en'
+        ? 'JSON backup file downloaded'
+        : 'JSON ব্যাকআপ ফাইল ডাউনলোড হয়েছে'
+    );
   };
 
   const handleCopyRules = () => {
     navigator.clipboard?.writeText(FIRESTORE_RULES_TEXT);
     setCopiedRules(true);
-    showToast('Firestore Security Rules কপি করা হয়েছে');
+    showToast(
+      lang === 'en'
+        ? 'Firestore Security Rules copied'
+        : 'Firestore Security Rules কপি করা হয়েছে'
+    );
     setTimeout(() => setCopiedRules(false), 2500);
   };
 
@@ -1254,18 +1823,44 @@ export default function App() {
         window.focus();
         window.print();
       } else {
-        showToast('ব্রাউজারের Share বা Menu (⋮) থেকে Print / Save as PDF সিলেক্ট করুন', 'error');
+        showToast(
+          lang === 'en'
+            ? 'Select Print / Save as PDF from your browser menu'
+            : 'ব্রাউজারের Share বা Menu (⋮) থেকে Print / Save as PDF সিলেক্ট করুন',
+          'error'
+        );
       }
     } catch (err) {
       console.error('Print trigger failed:', err);
-      showToast('ব্রাউজারের Share বা Menu (⋮) থেকে Print / Save as PDF সিলেক্ট করুন', 'error');
+      showToast(
+        lang === 'en'
+          ? 'Select Print / Save as PDF from your browser menu'
+          : 'ব্রাউজারের Share বা Menu (⋮) থেকে Print / Save as PDF সিলেক্ট করুন',
+        'error'
+      );
     }
   };
 
   const activeDriverObj = drivers.find((d) => d.id === selectedDriverId);
 
+  // Reusable Language Switcher Pill
+  const renderLanguageToggle = () => (
+    <button
+      type="button"
+      onClick={toggleLanguage}
+      aria-label="Switch Language between Bangla and English"
+      title={lang === 'bn' ? 'Switch to English' : 'বাংলায় পরিবর্তন করুন'}
+      className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition shrink-0"
+    >
+      <Globe className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+      <span className={lang === 'bn' ? 'text-emerald-400' : 'text-slate-400'}>বাংলা</span>
+      <span className="text-slate-600">|</span>
+      <span className={lang === 'en' ? 'text-emerald-400' : 'text-slate-400'}>EN</span>
+    </button>
+  );
+
   // ==========================================
-  // 5. MOBILE-FRIENDLY LOGIN SCREEN
+  // 6. MOBILE-FRIENDLY LOGIN SCREEN
   // ==========================================
   if (!currentUser) {
     return (
@@ -1282,15 +1877,18 @@ export default function App() {
         )}
 
         <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
-          <div className="bg-slate-900 text-white p-5 sm:p-6 text-center">
+          <div className="bg-slate-900 text-white p-5 sm:p-6 text-center relative">
+            <div className="flex justify-end mb-2">
+              {renderLanguageToggle()}
+            </div>
             <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-emerald-500/20 border border-emerald-400/30 mb-3">
               <Car className="w-6 h-6 sm:w-7 sm:h-7 text-emerald-400" />
             </div>
             <h1 className="text-lg sm:text-xl font-bold tracking-tight">
-              হাশেম কার রেন্টাল
+              {t.brandName}
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Developed by Ittehad Nur
+              {t.developedBy}
             </p>
           </div>
 
@@ -1308,7 +1906,7 @@ export default function App() {
               }`}
             >
               <Car className="w-4 h-4 shrink-0" />
-              ড্রাইভার লগইন
+              {t.driverLogin}
             </button>
             <button
               type="button"
@@ -1323,7 +1921,7 @@ export default function App() {
               }`}
             >
               <ShieldCheck className="w-4 h-4 shrink-0" />
-              অ্যাডমিন লগইন
+              {t.adminLogin}
             </button>
           </div>
 
@@ -1339,27 +1937,27 @@ export default function App() {
               <form onSubmit={handleDriverLogin} className="space-y-4">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                    ড্রাইভার আইডি বা মোবাইল নম্বর *
+                    {t.driverIdOrPhoneLabel}
                   </label>
                   <input
                     type="text"
                     value={driverLoginId}
                     onChange={(e) => setDriverLoginId(e.target.value)}
-                    placeholder="যেমন: DRV-01 বা 017XXXXXXXX"
+                    placeholder={t.driverIdOrPhonePlaceholder}
                     className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-base"
                     required
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                    পিন (PIN) *
+                    {t.pinLabel}
                   </label>
                   <input
                     type="password"
                     inputMode="numeric"
                     value={driverLoginPin}
                     onChange={(e) => setDriverLoginPin(e.target.value)}
-                    placeholder="আপনার পিন নম্বর দিন"
+                    placeholder={t.pinPlaceholder}
                     className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-base"
                     required
                   />
@@ -1369,33 +1967,33 @@ export default function App() {
                   className="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-bold text-sm sm:text-base shadow-sm transition flex items-center justify-center gap-2"
                 >
                   <KeyRound className="w-4 h-4" />
-                  ড্রাইভার প্যানেলে প্রবেশ করুন
+                  {t.enterDriverPanel}
                 </button>
               </form>
             ) : (
               <form onSubmit={handleAdminLogin} className="space-y-4">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                    অ্যাডমিন ইমেইল বা মোবাইল নম্বর *
+                    {t.adminEmailOrPhoneLabel}
                   </label>
                   <input
                     type="text"
                     value={adminLoginEmail}
                     onChange={(e) => setAdminLoginEmail(e.target.value)}
-                    placeholder="ইমেইল বা 018XXXXXXXX দিন"
+                    placeholder={t.adminEmailOrPhonePlaceholder}
                     className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-800 focus:border-slate-800 outline-none text-base"
                     required
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                    পাসওয়ার্ড *
+                    {t.passwordLabel}
                   </label>
                   <input
                     type="password"
                     value={adminLoginPassword}
                     onChange={(e) => setAdminLoginPassword(e.target.value)}
-                    placeholder="পাসওয়ার্ড দিন"
+                    placeholder={t.passwordPlaceholder}
                     className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-800 focus:border-slate-800 outline-none text-base"
                     required
                   />
@@ -1405,7 +2003,7 @@ export default function App() {
                   className="w-full py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white font-bold text-sm sm:text-base shadow-sm transition flex items-center justify-center gap-2"
                 >
                   <ShieldCheck className="w-4 h-4" />
-                  অ্যাডমিন প্যানেলে প্রবেশ করুন
+                  {t.enterAdminPanel}
                 </button>
               </form>
             )}
@@ -1417,8 +2015,8 @@ export default function App() {
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="WhatsApp-এ যোগাযোগ করুন"
-          title="WhatsApp-এ যোগাযোগ করুন"
+          aria-label="WhatsApp"
+          title="WhatsApp"
           className="fixed bottom-5 right-5 z-40 flex items-center gap-2 px-4 py-3 rounded-full bg-[#25D366] hover:bg-[#1ebe5d] active:scale-95 text-white font-bold text-sm shadow-xl transition"
         >
           <MessageCircle className="w-5 h-5 shrink-0" />
@@ -1429,7 +2027,7 @@ export default function App() {
   }
 
   // ==========================================
-  // 6. AUTHENTICATED MOBILE-FRIENDLY SHELL
+  // 7. AUTHENTICATED MOBILE-FRIENDLY SHELL
   // ==========================================
   const isAdmin = currentUser.role === 'admin';
   const isDriver = currentUser.role === 'driver';
@@ -1479,7 +2077,7 @@ export default function App() {
             </div>
             <div className="min-w-0">
               <h1 className="text-sm sm:text-lg font-bold tracking-tight text-white truncate">
-                হাশেম কার রেন্টাল
+                {t.brandName}
               </h1>
               <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-slate-300 truncate">
                 <span
@@ -1489,20 +2087,25 @@ export default function App() {
                       : 'bg-emerald-500/20 text-emerald-300'
                   }`}
                 >
-                  {isAdmin ? `${currentUser.name} (অ্যাডমিন)` : `${currentUser.name} (${currentUser.driverId})`}
+                  {isAdmin
+                    ? `${currentUser.name} (${t.adminBadge})`
+                    : `${currentUser.name} (${currentUser.driverId})`}
                 </span>
               </div>
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="px-3 py-2 rounded-xl bg-rose-600/90 hover:bg-rose-600 text-white text-xs font-semibold flex items-center gap-1.5 transition shrink-0"
-          >
-            <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span>লগ আউট</span>
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            {renderLanguageToggle()}
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="px-3 py-2 rounded-xl bg-rose-600/90 hover:bg-rose-600 text-white text-xs font-semibold flex items-center gap-1.5 transition shrink-0"
+            >
+              <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span>{t.logout}</span>
+            </button>
+          </div>
         </div>
 
         {/* Desktop / Tablet Top Tabs */}
@@ -1520,7 +2123,7 @@ export default function App() {
                   }`}
                 >
                   <MapPin className="w-4 h-4" />
-                  রেন্ট ইনপুট
+                  {t.navRentInput}
                 </button>
                 <button
                   type="button"
@@ -1532,7 +2135,7 @@ export default function App() {
                   }`}
                 >
                   <Fuel className="w-4 h-4" />
-                  গ্যাস-খরচ ইনপুট
+                  {t.navGasInput}
                 </button>
                 <button
                   type="button"
@@ -1547,7 +2150,7 @@ export default function App() {
                   }`}
                 >
                   <FileText className="w-4 h-4" />
-                  আমার সামারি রিপোর্ট
+                  {t.navMySummary}
                 </button>
               </>
             )}
@@ -1564,7 +2167,7 @@ export default function App() {
                   }`}
                 >
                   <LayoutDashboard className="w-4 h-4" />
-                  মাস্টার অ্যাডমিন প্যানেল
+                  {t.navMasterAdmin}
                   {pendingGasCount > 0 && (
                     <span className="px-1.5 py-0.5 rounded-full text-[11px] bg-rose-600 text-white font-bold">
                       {pendingGasCount}
@@ -1581,7 +2184,7 @@ export default function App() {
                   }`}
                 >
                   <FileText className="w-4 h-4" />
-                  সামারি ও PDF রিপোর্ট
+                  {t.navSummaryPdf}
                 </button>
               </>
             )}
@@ -1593,13 +2196,13 @@ export default function App() {
       {isDriver && (
         <div
           role="region"
-          aria-label="ড্রাইভার নিরাপত্তা সতর্কতা"
+          aria-label="Driver Safety Notice"
           className="no-print driver-ticker-wrap bg-amber-50 border-b border-amber-200 text-amber-950 overflow-hidden py-2 select-none"
         >
           <div className="driver-ticker-track text-xs sm:text-sm font-semibold">
-            <span className="px-6 whitespace-nowrap">{DRIVER_SAFETY_SCROLL_TEXT}</span>
+            <span className="px-6 whitespace-nowrap">{DRIVER_SAFETY_SCROLL_TEXT[lang]}</span>
             <span className="px-6 whitespace-nowrap" aria-hidden="true">
-              {DRIVER_SAFETY_SCROLL_TEXT}
+              {DRIVER_SAFETY_SCROLL_TEXT[lang]}
             </span>
           </div>
         </div>
@@ -1620,7 +2223,7 @@ export default function App() {
                 }`}
               >
                 <MapPin className="w-4 h-4 mb-0.5" />
-                <span>রেন্ট ইনপুট</span>
+                <span>{t.navRentInput}</span>
               </button>
               <button
                 type="button"
@@ -1632,7 +2235,7 @@ export default function App() {
                 }`}
               >
                 <Fuel className="w-4 h-4 mb-0.5" />
-                <span>গ্যাস খরচ</span>
+                <span>{t.navGasShort}</span>
               </button>
               <button
                 type="button"
@@ -1647,7 +2250,7 @@ export default function App() {
                 }`}
               >
                 <FileText className="w-4 h-4 mb-0.5" />
-                <span>সামারি</span>
+                <span>{t.navSummaryShort}</span>
               </button>
             </>
           )}
@@ -1664,7 +2267,7 @@ export default function App() {
                 }`}
               >
                 <LayoutDashboard className="w-4 h-4 mb-0.5" />
-                <span>অ্যাডমিন প্যানেল</span>
+                <span>{t.navAdminShort}</span>
                 {pendingGasCount > 0 && (
                   <span className="absolute top-1 right-4 px-1.5 py-0.2 rounded-full text-[10px] bg-rose-600 text-white font-bold">
                     {pendingGasCount}
@@ -1681,7 +2284,7 @@ export default function App() {
                 }`}
               >
                 <FileText className="w-4 h-4 mb-0.5" />
-                <span>রিপোর্ট</span>
+                <span>{t.navReportShort}</span>
               </button>
             </>
           )}
@@ -1693,7 +2296,7 @@ export default function App() {
         {isLoadingData && (
           <div className="no-print mb-4 bg-blue-50 border border-blue-200 text-blue-800 px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-2">
             <span className="animate-spin inline-block w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full" />
-            ডাটাবেজ থেকে তথ্য লোড হচ্ছে...
+            {t.loadingData}
           </div>
         )}
 
@@ -1707,14 +2310,14 @@ export default function App() {
                 <div>
                   <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
                     <MapPin className="w-5 h-5 text-emerald-600 shrink-0" />
-                    নতুন রেন্ট (ভাড়া) ইনপুট
+                    {t.newRentTitle}
                   </h2>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    গাড়ি: <strong>{currentUser.carNumber || 'নির্ধারিত'}</strong> • সেভ হলে লক হয়ে যাবে
+                    {t.carLabel} <strong>{currentUser.carNumber || t.notAssigned}</strong> • {t.lockedAfterSaveNote}
                   </p>
                 </div>
                 <span className="text-[11px] sm:text-xs font-semibold bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200">
-                  ২৫% কমিশন অটো হিসাব
+                  {t.autoCommissionBadge}
                 </span>
               </div>
 
@@ -1722,26 +2325,26 @@ export default function App() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1">
-                      যাত্রা লোকেশন (Pickup) *
+                      {t.pickupLabel}
                     </label>
                     <input
                       type="text"
                       value={pickupLocation}
                       onChange={(e) => setPickupLocation(e.target.value)}
-                      placeholder="যেমন: উত্তরা, ঢাকা"
+                      placeholder={t.pickupPlaceholder}
                       className="w-full px-3.5 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-base"
                       required
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1">
-                      গন্তব্য লোকেশন (Drop-off) *
+                      {t.dropLabel}
                     </label>
                     <input
                       type="text"
                       value={dropLocation}
                       onChange={(e) => setDropLocation(e.target.value)}
-                      placeholder="যেমন: চট্টগ্রাম শহর"
+                      placeholder={t.dropPlaceholder}
                       className="w-full px-3.5 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-base"
                       required
                     />
@@ -1751,7 +2354,7 @@ export default function App() {
                 <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 sm:gap-3.5 items-end">
                   <div className="sm:col-span-2 min-w-0">
                     <label className="block text-sm font-semibold text-slate-700 mb-1">
-                      মোট ভাড়া (টাকা) *
+                      {t.totalFareLabel}
                     </label>
                     <input
                       type="number"
@@ -1760,7 +2363,7 @@ export default function App() {
                       step="any"
                       value={totalFare}
                       onChange={(e) => setTotalFare(e.target.value)}
-                      placeholder="যেমন: ৫০০০"
+                      placeholder={t.totalFarePlaceholder}
                       className="w-full px-3.5 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-base font-bold"
                       required
                     />
@@ -1768,7 +2371,7 @@ export default function App() {
 
                   <div className="sm:col-span-2 min-w-0">
                     <label className="block text-sm font-semibold text-slate-700 mb-1">
-                      যাত্রীর মোবাইল নম্বর *
+                      {t.passengerPhoneLabel}
                     </label>
                     <div className="relative">
                       <Phone className="w-4 h-4 text-slate-400 left-3.5 top-3.5 absolute" />
@@ -1786,7 +2389,7 @@ export default function App() {
 
                   <div className="sm:col-span-1 min-w-0">
                     <label className="block text-xs font-semibold text-slate-700 mb-1 truncate">
-                      ভাড়ার তারিখ *
+                      {t.rentDateLabel}
                     </label>
                     <div className="relative">
                       <Calendar className="w-3.5 h-3.5 text-slate-400 left-2.5 top-3.5 absolute pointer-events-none" />
@@ -1803,7 +2406,7 @@ export default function App() {
 
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                    ভাড়ার ধরন *
+                    {t.tripTypeLabel}
                   </label>
                   <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
                     <button
@@ -1816,7 +2419,7 @@ export default function App() {
                       }`}
                     >
                       <ArrowRight className="w-4 h-4 shrink-0" />
-                      <span>শুধু যাওয়া</span>
+                      <span>{t.oneWay}</span>
                     </button>
                     <button
                       type="button"
@@ -1828,30 +2431,30 @@ export default function App() {
                       }`}
                     >
                       <ArrowRightLeft className="w-4 h-4 shrink-0" />
-                      <span>আসা-যাওয়া</span>
+                      <span>{t.roundTrip}</span>
                     </button>
                   </div>
                 </div>
 
                 <div className="bg-slate-900 text-white rounded-2xl p-4">
                   <div className="text-[11px] sm:text-xs uppercase tracking-wider text-emerald-400 font-semibold mb-2.5">
-                    স্বয়ংক্রিয় হিসাব (২৫% ড্রাইভার কমিশন)
+                    {t.autoCalcTitle}
                   </div>
                   <div className="grid grid-cols-3 gap-2 sm:gap-3">
                     <div className="bg-slate-800/80 rounded-xl p-2.5 sm:p-3 border border-slate-700">
-                      <div className="text-[11px] text-slate-400">মোট ভাড়া</div>
+                      <div className="text-[11px] text-slate-400">{t.totalFareShort}</div>
                       <div className="text-sm sm:text-lg font-bold text-white mt-0.5 truncate">
                         {formatBDT(numericFare)}
                       </div>
                     </div>
                     <div className="bg-emerald-950/70 rounded-xl p-2.5 sm:p-3 border border-emerald-700/50">
-                      <div className="text-[11px] text-emerald-300">কমিশন (২৫%)</div>
+                      <div className="text-[11px] text-emerald-300">{t.commission25}</div>
                       <div className="text-sm sm:text-lg font-bold text-emerald-400 mt-0.5 truncate">
                         {formatBDT(calculatedCommission)}
                       </div>
                     </div>
                     <div className="bg-slate-800/80 rounded-xl p-2.5 sm:p-3 border border-slate-700">
-                      <div className="text-[11px] text-slate-300">অবশিষ্ট ভাড়া</div>
+                      <div className="text-[11px] text-slate-300">{t.remainingFare}</div>
                       <div className="text-sm sm:text-lg font-bold text-amber-300 mt-0.5 truncate">
                         {formatBDT(calculatedRemainingFare)}
                       </div>
@@ -1866,7 +2469,7 @@ export default function App() {
                     className="w-full py-3.5 sm:py-3 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] disabled:opacity-60 text-white font-bold text-sm sm:text-base shadow-sm transition flex items-center justify-center gap-2"
                   >
                     <Plus className="w-4 h-4" />
-                    <span>{isSubmittingRent ? 'সংরক্ষণ হচ্ছে...' : 'ভাড়ার হিসাব সেভ করুন'}</span>
+                    <span>{isSubmittingRent ? t.saving : t.saveRentBtn}</span>
                   </button>
                 </div>
               </form>
@@ -1874,9 +2477,10 @@ export default function App() {
 
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5">
               <h3 className="font-bold text-slate-900 mb-3 flex items-center justify-between text-sm sm:text-base">
-                <span>আপনার সাম্প্রতিক ভাড়া</span>
+                <span>{t.yourRecentRents}</span>
                 <span className="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">
-                  {rents.filter((r) => r.driverId === currentUser.driverId).length}টি
+                  {rents.filter((r) => r.driverId === currentUser.driverId).length}
+                  {t.countSuffix}
                 </span>
               </h3>
               <div className="space-y-3 max-h-[480px] overflow-y-auto pr-0.5">
@@ -1903,26 +2507,28 @@ export default function App() {
                           </span>
                         </span>
                         <span className="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-                          {r.tripType === 'round-trip' ? 'আসা-যাওয়া' : 'শুধু যাওয়া'}
+                          {r.tripType === 'round-trip' ? t.roundTrip : t.oneWay}
                         </span>
                       </div>
                       <div className="font-semibold text-sm text-slate-800">
                         {r.pickupLocation} → {r.dropLocation}
                       </div>
-                      <div className="text-xs text-slate-500 mt-1">যাত্রী: {r.passengerPhone}</div>
+                      <div className="text-xs text-slate-500 mt-1">
+                        {t.passengerPrefix} {r.passengerPhone}
+                      </div>
                       <div className="mt-2 pt-2 border-t border-slate-200/70 flex items-center justify-between text-xs">
                         <span>
-                          মোট: <strong>{formatBDT(r.totalFare)}</strong>
+                          {t.totalPrefix} <strong>{formatBDT(r.totalFare)}</strong>
                         </span>
                         <span className="text-emerald-700 font-bold">
-                          কমিশন: {formatBDT(r.driverCommission)}
+                          {t.commissionPrefix} {formatBDT(r.driverCommission)}
                         </span>
                       </div>
                     </div>
                   ))}
                 {rents.filter((r) => r.driverId === currentUser.driverId).length === 0 && (
                   <div className="text-center py-8 text-slate-400 text-sm">
-                    আপনার এখনো কোনো ভাড়ার এন্ট্রি নেই।
+                    {t.noRentsYet}
                   </div>
                 )}
               </div>
@@ -1939,10 +2545,10 @@ export default function App() {
               <div className="border-b border-slate-100 pb-3.5 mb-4 sm:mb-5">
                 <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
                   <Fuel className="w-5 h-5 text-amber-600 shrink-0" />
-                  গ্যাস-খরচ ইনপুট
+                  {t.gasInputTitle}
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  সাবমিট করার পর অ্যাডমিন অনুমোদন করলে এটি গ্যাস খরচে যুক্ত হবে
+                  {t.gasInputSub}
                 </p>
               </div>
 
@@ -1950,7 +2556,7 @@ export default function App() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
                   <div className="min-w-0">
                     <label className="block text-sm font-semibold text-slate-700 mb-1">
-                      তারিখ *
+                      {t.dateLabel}
                     </label>
                     <input
                       type="date"
@@ -1963,7 +2569,7 @@ export default function App() {
 
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1">
-                      গ্যাস খরচের পরিমাণ (টাকা) *
+                      {t.gasAmountLabel}
                     </label>
                     <input
                       type="number"
@@ -1972,7 +2578,7 @@ export default function App() {
                       step="any"
                       value={gasAmount}
                       onChange={(e) => setGasAmount(e.target.value)}
-                      placeholder="যেমন: ১২০০"
+                      placeholder={t.gasAmountPlaceholder}
                       className="w-full px-3.5 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none text-base font-bold"
                       required
                     />
@@ -1981,7 +2587,7 @@ export default function App() {
 
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1">
-                    গ্যাস ফিলিং স্টেশন সিলেক্ট করুন *
+                    {t.selectStationLabel}
                   </label>
                   <select
                     value={selectedStationId}
@@ -1990,9 +2596,7 @@ export default function App() {
                     required
                   >
                     <option value="">
-                      {stations.length > 0
-                        ? '-- ফিলিং স্টেশন নির্বাচন করুন --'
-                        : '-- কোনো স্টেশন যোগ করা হয়নি --'}
+                      {stations.length > 0 ? t.selectStationDefault : t.noStationAdded}
                     </option>
                     {stations.map((stn) => (
                       <option key={stn.id} value={stn.id}>
@@ -2004,7 +2608,7 @@ export default function App() {
 
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1">
-                    রিসিপ্ট এর ছবি এড করুন *
+                    {t.addReceiptLabel}
                   </label>
                   <div className="border-2 border-dashed border-slate-300 rounded-2xl p-4 sm:p-5 text-center hover:border-amber-500 transition bg-slate-50/70">
                     <input
@@ -2023,10 +2627,10 @@ export default function App() {
                         <Camera className="w-6 h-6" />
                       </div>
                       <span className="text-sm font-bold text-slate-700">
-                        {receiptFileName ? receiptFileName : 'রিসিপ্টের ছবি তুলুন বা গ্যালারি থেকে নিন'}
+                        {receiptFileName ? receiptFileName : t.captureOrGallery}
                       </span>
                       <span className="text-xs text-slate-400">
-                        ফোন ক্যামেরা বা গ্যালারি থেকে ছবি সিলেক্ট করুন
+                        {t.selectFromCameraOrGallery}
                       </span>
                     </label>
 
@@ -2034,7 +2638,7 @@ export default function App() {
                       <div className="mt-3 flex flex-col items-center">
                         <img
                           src={receiptBase64}
-                          alt="রিসিপ্ট প্রিভিউ"
+                          alt="Receipt preview"
                           className="max-h-48 rounded-xl border border-slate-200 shadow-sm object-contain"
                         />
                         <button
@@ -2045,7 +2649,7 @@ export default function App() {
                           }}
                           className="mt-2 text-xs text-rose-600 hover:underline font-semibold"
                         >
-                          ছবি মুছে ফেলুন
+                          {t.removeImage}
                         </button>
                       </div>
                     )}
@@ -2059,7 +2663,7 @@ export default function App() {
                     className="w-full py-3.5 sm:py-3 px-6 rounded-xl bg-amber-600 hover:bg-amber-700 active:scale-[0.99] disabled:opacity-60 text-white font-bold text-sm sm:text-base shadow-sm transition flex items-center justify-center gap-2"
                   >
                     <Plus className="w-4 h-4" />
-                    <span>{isSubmittingGas ? 'আপলোড হচ্ছে...' : 'অনুমোদনের জন্য পাঠান'}</span>
+                    <span>{isSubmittingGas ? t.uploading : t.submitForApproval}</span>
                   </button>
                 </div>
               </form>
@@ -2067,9 +2671,10 @@ export default function App() {
 
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5">
               <h3 className="font-bold text-slate-900 mb-3 flex items-center justify-between text-sm sm:text-base">
-                <span>আপনার গ্যাস খরচের তালিকা</span>
+                <span>{t.yourGasList}</span>
                 <span className="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">
-                  {gasExpenses.filter((g) => g.driverId === currentUser.driverId).length}টি
+                  {gasExpenses.filter((g) => g.driverId === currentUser.driverId).length}
+                  {t.countSuffix}
                 </span>
               </h3>
 
@@ -2118,7 +2723,7 @@ export default function App() {
                             className="px-3 py-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-xs font-semibold text-slate-700 flex items-center gap-1 shrink-0"
                           >
                             <Eye className="w-3.5 h-3.5 text-amber-600" />
-                            রিসিপ্ট
+                            {t.receiptBtn}
                           </button>
                         )}
                       </div>
@@ -2126,7 +2731,7 @@ export default function App() {
                   })}
                 {gasExpenses.filter((g) => g.driverId === currentUser.driverId).length === 0 && (
                   <div className="text-center py-8 text-slate-400 text-sm">
-                    আপনার এখনো কোনো গ্যাস খরচের রেকর্ড নেই।
+                    {t.noGasYet}
                   </div>
                 )}
               </div>
@@ -2143,10 +2748,10 @@ export default function App() {
               <div className="flex flex-wrap items-center justify-between gap-3 pb-3.5 border-b border-slate-100">
                 <div>
                   <h2 className="text-base sm:text-lg font-bold text-slate-900">
-                    {isDriver ? 'আমার সামারি রিপোর্ট' : 'সামারি রিপোর্ট ও PDF প্রিন্ট'}
+                    {isDriver ? t.navMySummary : t.navSummaryPdf}
                   </h2>
                   <p className="text-xs text-slate-500">
-                    ৭, ১০, ১৫, ৩০ দিন বা কাস্টম তারিখে হিসাব দেখুন (Unpaid শেষ হলে বাকি গ্যাস Paid ভাড়া থেকে কাটা হয়)
+                    {t.summaryReportSub}
                   </p>
                 </div>
 
@@ -2156,7 +2761,7 @@ export default function App() {
                   className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition"
                 >
                   <Printer className="w-4 h-4" />
-                  <span>PDF / প্রিন্ট করুন</span>
+                  <span>{t.printPdfBtn}</span>
                 </button>
               </div>
 
@@ -2164,15 +2769,15 @@ export default function App() {
                 {isAdmin && (
                   <div className="md:col-span-3 min-w-0">
                     <label className="block text-xs font-semibold text-slate-600 mb-1">
-                      রিপোর্টের আওতা
+                      {t.reportScopeLabel}
                     </label>
                     <select
                       value={reportScope}
                       onChange={(e) => setReportScope(e.target.value)}
                       className="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white"
                     >
-                      <option value="all">সকল ড্রাইভার (সম্মিলিত)</option>
-                      <option value="single">নির্দিষ্ট ড্রাইভার</option>
+                      <option value="all">{t.allDriversScope}</option>
+                      <option value="single">{t.singleDriverScope}</option>
                     </select>
                   </div>
                 )}
@@ -2180,7 +2785,7 @@ export default function App() {
                 {isAdmin && reportScope === 'single' && (
                   <div className="md:col-span-3 min-w-0">
                     <label className="block text-xs font-semibold text-slate-600 mb-1">
-                      ড্রাইভার নির্বাচন
+                      {t.selectDriverLabel}
                     </label>
                     <select
                       value={selectedDriverId}
@@ -2198,15 +2803,15 @@ export default function App() {
 
                 <div className={isAdmin && reportScope === 'single' ? 'md:col-span-6 min-w-0' : 'md:col-span-5 min-w-0'}>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">
-                    সময়কাল
+                    {t.durationLabel}
                   </label>
                   <div className="grid grid-cols-5 gap-1.5">
                     {[
-                      { key: '7', label: '৭ দিন' },
-                      { key: '10', label: '১০ দিন' },
-                      { key: '15', label: '১৫ দিন' },
-                      { key: '30', label: '৩০ দিন' },
-                      { key: 'custom', label: 'কাস্টম' }
+                      { key: '7', label: t.days7 },
+                      { key: '10', label: t.days10 },
+                      { key: '15', label: t.days15 },
+                      { key: '30', label: t.days30 },
+                      { key: 'custom', label: t.customRange }
                     ].map((p) => (
                       <button
                         key={p.key}
@@ -2227,7 +2832,7 @@ export default function App() {
                 <div className="md:col-span-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div className="min-w-0">
                     <label className="block text-xs font-semibold text-slate-600 mb-1">
-                      শুরুর তারিখ
+                      {t.startDateLabel}
                     </label>
                     <input
                       type="date"
@@ -2241,7 +2846,7 @@ export default function App() {
                   </div>
                   <div className="min-w-0">
                     <label className="block text-xs font-semibold text-slate-600 mb-1">
-                      শেষ তারিখ
+                      {t.endDateLabel}
                     </label>
                     <input
                       type="date"
@@ -2261,24 +2866,27 @@ export default function App() {
               <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 pb-4 mb-5">
                 <div>
                   <div className="text-xs font-bold uppercase tracking-wider text-emerald-700">
-                    হিসাব বিবরণী
+                    {t.statementHeader}
                   </div>
                   <h3 className="text-lg sm:text-xl font-bold text-slate-900 mt-0.5">
                     {isAdmin && reportScope === 'all'
-                      ? 'সকল ড্রাইভারের সামারি রিপোর্ট'
-                      : `সামারি: ${
+                      ? t.allDriversReportTitle
+                      : `${t.summaryPrefix} ${
                           isDriver ? currentUser.name : activeDriverObj?.name || selectedDriverId
                         }`}
                   </h3>
                   <p className="text-xs text-slate-500 mt-1">
-                    সময়কাল: <strong>{startDate}</strong> থেকে <strong>{endDate}</strong>
+                    {t.periodPrefix} <strong>{startDate}</strong> {t.toText} <strong>{endDate}</strong>
                   </p>
                 </div>
                 <div className="text-left sm:text-right text-xs text-slate-500">
-                  <div>তারিখ: {todayISO()}</div>
+                  <div>
+                    {t.datePrefix} {todayISO()}
+                  </div>
                   <div className="font-semibold text-slate-700 mt-0.5">
-                    ট্রিপ: {filteredSummary.matchingRents.length}টি | অনুমোদিত গ্যাস:{' '}
-                    {filteredSummary.matchingGas.length}টি
+                    {t.tripsLabel} {filteredSummary.matchingRents.length}
+                    {t.countSuffix} | {t.approvedGasLabel} {filteredSummary.matchingGas.length}
+                    {t.countSuffix}
                   </div>
                 </div>
               </div>
@@ -2289,7 +2897,7 @@ export default function App() {
                 } gap-3 sm:gap-4 mb-4`}
               >
                 <div className="p-3.5 sm:p-4 rounded-xl bg-slate-50 border border-slate-200">
-                  <div className="text-xs font-semibold text-slate-500">মোট ভাড়া</div>
+                  <div className="text-xs font-semibold text-slate-500">{t.totalFareShort}</div>
                   <div className="text-lg sm:text-xl font-bold text-slate-900 mt-1">
                     {formatBDT(filteredSummary.totalRentAmount)}
                   </div>
@@ -2297,7 +2905,7 @@ export default function App() {
 
                 <div className="p-3.5 sm:p-4 rounded-xl bg-emerald-50 border border-emerald-200">
                   <div className="text-xs font-semibold text-emerald-700">
-                    {isDriver ? 'আমার ২৫% কমিশন' : 'কমিশন (২৫%)'}
+                    {isDriver ? t.myCommission25 : t.commission25}
                   </div>
                   <div className="text-lg sm:text-xl font-bold text-emerald-700 mt-1">
                     {formatBDT(filteredSummary.totalDriverCommission)}
@@ -2305,7 +2913,7 @@ export default function App() {
                 </div>
 
                 <div className="p-3.5 sm:p-4 rounded-xl bg-amber-50 border border-amber-200">
-                  <div className="text-xs font-semibold text-amber-800">মোট গ্যাস খরচ</div>
+                  <div className="text-xs font-semibold text-amber-800">{t.totalGasCost}</div>
                   <div className="text-lg sm:text-xl font-bold text-amber-800 mt-1">
                     {formatBDT(filteredSummary.totalGasAmount)}
                   </div>
@@ -2314,7 +2922,7 @@ export default function App() {
                 {isAdmin && (
                   <div className="p-3.5 sm:p-4 rounded-xl bg-slate-900 text-white border border-slate-800">
                     <div className="text-xs font-semibold text-emerald-300">
-                      মালিকের নিট আয়
+                      {t.ownerNetIncome}
                     </div>
                     <div className="text-lg sm:text-xl font-bold text-white mt-1">
                       {formatBDT(filteredSummary.ownerNetIncome)}
@@ -2328,11 +2936,12 @@ export default function App() {
                 <div className="p-3.5 rounded-xl bg-emerald-50/80 border border-emerald-200 flex items-center justify-between gap-2">
                   <div>
                     <div className="text-xs font-semibold text-emerald-800">
-                      আদায়কৃত ভাড়া (Paid • ২৫% ও অবশিষ্ট গ্যাস বাদে)
+                      {t.paidRentCardTitle}
                     </div>
                     <div className="text-[11px] text-emerald-700/80 mt-0.5">
-                      {filteredSummary.paidRents.length}টি ট্রিপ • Paid ভাড়া:{' '}
-                      {formatBDT(filteredSummary.paidRentAmount)} − গ্যাস কাটা:{' '}
+                      {filteredSummary.paidRents.length}
+                      {t.countSuffix} • {t.paidRentLabel}{' '}
+                      {formatBDT(filteredSummary.paidRentAmount)} − {t.gasDeductedLabel}{' '}
                       {formatBDT(filteredSummary.gasDeductedFromPaid)}
                     </div>
                   </div>
@@ -2344,11 +2953,12 @@ export default function App() {
                 <div className="p-3.5 rounded-xl bg-rose-50/80 border border-rose-200 flex items-center justify-between gap-2">
                   <div>
                     <div className="text-xs font-semibold text-rose-800">
-                      বাকি ভাড়া (Unpaid • ২৫% ও অনুমোদিত গ্যাস বাদে)
+                      {t.unpaidRentCardTitle}
                     </div>
                     <div className="text-[11px] text-rose-700/80 mt-0.5">
-                      {filteredSummary.unpaidRents.length}টি ট্রিপ • ২৫% বাদে:{' '}
-                      {formatBDT(filteredSummary.unpaidRentAfterCommission)} − গ্যাস কাটা:{' '}
+                      {filteredSummary.unpaidRents.length}
+                      {t.countSuffix} • {t.after25Label}{' '}
+                      {formatBDT(filteredSummary.unpaidRentAfterCommission)} − {t.gasDeductedLabel}{' '}
                       {formatBDT(filteredSummary.gasDeductedFromUnpaid)}
                     </div>
                   </div>
@@ -2358,7 +2968,7 @@ export default function App() {
                 </div>
               </div>
 
-              <h4 className="font-bold text-slate-800 text-sm mb-2.5">ভাড়ার বিস্তারিত</h4>
+              <h4 className="font-bold text-slate-800 text-sm mb-2.5">{t.rentDetailsTitle}</h4>
               <div className="sm:hidden space-y-2.5 mb-6">
                 {filteredSummary.matchingRents.map((r) => (
                   <div
@@ -2378,7 +2988,7 @@ export default function App() {
                           {r.isPaid ? 'Paid' : 'Unpaid'}
                         </span>
                         <span className="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-                          {r.tripType === 'round-trip' ? 'আসা-যাওয়া' : 'শুধু যাওয়া'}
+                          {r.tripType === 'round-trip' ? t.roundTrip : t.oneWay}
                         </span>
                       </div>
                     </div>
@@ -2386,20 +2996,26 @@ export default function App() {
                       {r.pickupLocation} → {r.dropLocation}
                     </div>
                     {isAdmin && reportScope === 'all' && (
-                      <div className="text-slate-600">ড্রাইভার: {r.driverName || r.driverId}</div>
+                      <div className="text-slate-600">
+                        {t.driverCol}: {r.driverName || r.driverId}
+                      </div>
                     )}
-                    <div className="text-slate-500">যাত্রী: {r.passengerPhone}</div>
+                    <div className="text-slate-500">
+                      {t.passengerPrefix} {r.passengerPhone}
+                    </div>
                     <div className="pt-1.5 border-t border-slate-200 flex justify-between font-bold">
-                      <span>মোট: {formatBDT(r.totalFare)}</span>
+                      <span>
+                        {t.totalPrefix} {formatBDT(r.totalFare)}
+                      </span>
                       <span className="text-emerald-700">
-                        কমিশন: {formatBDT(r.driverCommission)}
+                        {t.commissionPrefix} {formatBDT(r.driverCommission)}
                       </span>
                     </div>
                   </div>
                 ))}
                 {filteredSummary.matchingRents.length === 0 && (
                   <div className="py-5 text-center text-slate-400 text-xs border border-dashed border-slate-200 rounded-xl">
-                    এই সময়কালে কোনো ভাড়ার তথ্য নেই।
+                    {t.noRentInPeriod}
                   </div>
                 )}
               </div>
@@ -2408,15 +3024,15 @@ export default function App() {
                 <table className="w-full text-left border-collapse text-sm">
                   <thead>
                     <tr className="bg-slate-100 text-slate-700 border-b border-slate-200">
-                      <th className="py-2.5 px-3">তারিখ</th>
-                      {isAdmin && reportScope === 'all' && <th className="py-2.5 px-3">ড্রাইভার</th>}
-                      <th className="py-2.5 px-3">যাত্রা → গন্তব্য</th>
-                      <th className="py-2.5 px-3">ধরন</th>
-                      <th className="py-2.5 px-3">স্ট্যাটাস</th>
-                      <th className="py-2.5 px-3">যাত্রীর নম্বর</th>
-                      <th className="py-2.5 px-3 text-right">মোট ভাড়া</th>
-                      <th className="py-2.5 px-3 text-right">কমিশন (২৫%)</th>
-                      {isAdmin && <th className="py-2.5 px-3 text-right">অবশিষ্ট ভাড়া</th>}
+                      <th className="py-2.5 px-3">{t.datePrefix.replace(':', '')}</th>
+                      {isAdmin && reportScope === 'all' && <th className="py-2.5 px-3">{t.driverCol}</th>}
+                      <th className="py-2.5 px-3">{t.routeCol}</th>
+                      <th className="py-2.5 px-3">{t.typeCol}</th>
+                      <th className="py-2.5 px-3">{t.statusCol}</th>
+                      <th className="py-2.5 px-3">{t.passengerCol}</th>
+                      <th className="py-2.5 px-3 text-right">{t.totalFareShort}</th>
+                      <th className="py-2.5 px-3 text-right">{t.commission25}</th>
+                      {isAdmin && <th className="py-2.5 px-3 text-right">{t.remainingFare}</th>}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -2430,7 +3046,7 @@ export default function App() {
                           {r.pickupLocation} → {r.dropLocation}
                         </td>
                         <td className="py-2.5 px-3 whitespace-nowrap">
-                          {r.tripType === 'round-trip' ? 'আসা-যাওয়া' : 'শুধু যাওয়া'}
+                          {r.tripType === 'round-trip' ? t.roundTrip : t.oneWay}
                         </td>
                         <td className="py-2.5 px-3 whitespace-nowrap">
                           <span
@@ -2463,7 +3079,7 @@ export default function App() {
                           colSpan={isAdmin && reportScope === 'all' ? 9 : 8}
                           className="py-6 text-center text-slate-400"
                         >
-                          এই সময়কালে কোনো ভাড়ার তথ্য পাওয়া যায়নি।
+                          {t.noRentInPeriod}
                         </td>
                       </tr>
                     )}
@@ -2472,7 +3088,7 @@ export default function App() {
               </div>
 
               <h4 className="font-bold text-slate-800 text-sm mb-2.5">
-                অনুমোদিত গ্যাস খরচের বিস্তারিত
+                {t.approvedGasDetailsTitle}
               </h4>
               <div className="sm:hidden space-y-2.5">
                 {filteredSummary.matchingGas.map((g) => (
@@ -2503,14 +3119,14 @@ export default function App() {
                         className="px-3 py-2 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 font-semibold flex items-center gap-1 shrink-0"
                       >
                         <Eye className="w-3.5 h-3.5" />
-                        রিসিপ্ট
+                        {t.receiptBtn}
                       </button>
                     )}
                   </div>
                 ))}
                 {filteredSummary.matchingGas.length === 0 && (
                   <div className="py-5 text-center text-slate-400 text-xs border border-dashed border-slate-200 rounded-xl">
-                    এই সময়কালে কোনো অনুমোদিত গ্যাস খরচের তথ্য নেই।
+                    {t.noGasInPeriod}
                   </div>
                 )}
               </div>
@@ -2519,12 +3135,12 @@ export default function App() {
                 <table className="w-full text-left border-collapse text-sm">
                   <thead>
                     <tr className="bg-slate-100 text-slate-700 border-b border-slate-200">
-                      <th className="py-2.5 px-3">তারিখ</th>
-                      {isAdmin && reportScope === 'all' && <th className="py-2.5 px-3">ড্রাইভার</th>}
-                      <th className="py-2.5 px-3">গ্যাস ফিলিং স্টেশন</th>
-                      <th className="py-2.5 px-3">স্ট্যাটাস</th>
-                      <th className="py-2.5 px-3 text-right">খরচের পরিমাণ</th>
-                      <th className="py-2.5 px-3 text-center no-print">রিসিপ্ট</th>
+                      <th className="py-2.5 px-3">{t.datePrefix.replace(':', '')}</th>
+                      {isAdmin && reportScope === 'all' && <th className="py-2.5 px-3">{t.driverCol}</th>}
+                      <th className="py-2.5 px-3">{t.stationCol}</th>
+                      <th className="py-2.5 px-3">{t.statusCol}</th>
+                      <th className="py-2.5 px-3 text-right">{t.amountCol}</th>
+                      <th className="py-2.5 px-3 text-center no-print">{t.receiptBtn}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -2557,10 +3173,10 @@ export default function App() {
                               className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 text-xs font-semibold"
                             >
                               <Eye className="w-3.5 h-3.5" />
-                              দেখুন
+                              {t.viewBtn}
                             </button>
                           ) : (
-                            <span className="text-xs text-slate-400">নেই</span>
+                            <span className="text-xs text-slate-400">{t.noneText}</span>
                           )}
                         </td>
                       </tr>
@@ -2571,7 +3187,7 @@ export default function App() {
                           colSpan={isAdmin && reportScope === 'all' ? 6 : 5}
                           className="py-6 text-center text-slate-400"
                         >
-                          এই সময়কালে কোনো অনুমোদিত গ্যাস খরচের তথ্য পাওয়া যায়নি।
+                          {t.noGasInPeriod}
                         </td>
                       </tr>
                     )}
@@ -2589,16 +3205,16 @@ export default function App() {
           <div className="space-y-5">
             <div className="flex overflow-x-auto gap-1.5 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
               {[
-                { id: 'overview', label: 'ওভারভিউ' },
-                { id: 'rents', label: `ভাড়া (${rents.length})` },
+                { id: 'overview', label: t.tabOverview },
+                { id: 'rents', label: `${t.tabRents} (${rents.length})` },
                 {
                   id: 'gas',
-                  label: `গ্যাস (${gasExpenses.length})`,
+                  label: `${t.tabGas} (${gasExpenses.length})`,
                   badge: pendingGasCount > 0 ? pendingGasCount : null
                 },
-                { id: 'drivers', label: `ড্রাইভার (${drivers.length})` },
-                { id: 'stations', label: `স্টেশন (${stations.length})` },
-                { id: 'security', label: 'ব্যাকআপ ও রুলস' }
+                { id: 'drivers', label: `${t.tabDrivers} (${drivers.length})` },
+                { id: 'stations', label: `${t.tabStations} (${stations.length})` },
+                { id: 'security', label: t.tabSecurity }
               ].map((sub) => (
                 <button
                   key={sub.id}
@@ -2624,43 +3240,47 @@ export default function App() {
               <div className="space-y-5">
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                   <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm">
-                    <div className="text-xs font-semibold text-slate-500">সর্বমোট ভাড়া</div>
+                    <div className="text-xs font-semibold text-slate-500">{t.grandTotalRent}</div>
                     <div className="text-lg sm:text-2xl font-bold text-slate-900 mt-1">
                       {formatBDT(overallTotals.totalRents)}
                     </div>
-                    <div className="text-[11px] text-slate-400 mt-1">{rents.length}টি ট্রিপ</div>
+                    <div className="text-[11px] text-slate-400 mt-1">
+                      {rents.length}
+                      {t.countSuffix}
+                    </div>
                   </div>
 
                   <div className="bg-white p-4 sm:p-5 rounded-2xl border border-emerald-200 shadow-sm">
                     <div className="text-xs font-semibold text-emerald-700">
-                      কমিশন (২৫%)
+                      {t.commission25}
                     </div>
                     <div className="text-lg sm:text-2xl font-bold text-emerald-700 mt-1">
                       {formatBDT(overallTotals.totalCommission)}
                     </div>
-                    <div className="text-[11px] text-emerald-600/80 mt-1">ড্রাইভারদের অংশ</div>
+                    <div className="text-[11px] text-emerald-600/80 mt-1">{t.driversShare}</div>
                   </div>
 
                   <div className="bg-white p-4 sm:p-5 rounded-2xl border border-amber-200 shadow-sm">
-                    <div className="text-xs font-semibold text-amber-800">মোট গ্যাস খরচ</div>
+                    <div className="text-xs font-semibold text-amber-800">{t.totalGasCost}</div>
                     <div className="text-lg sm:text-2xl font-bold text-amber-800 mt-1">
                       {formatBDT(overallTotals.totalGas)}
                     </div>
                     <div className="text-[11px] text-amber-700/80 mt-1">
-                      {approvedGasExpenses.length}টি অনুমোদিত
-                      {pendingGasCount > 0 ? ` • ${pendingGasCount}টি পেন্ডিং` : ''}
+                      {approvedGasExpenses.length}
+                      {t.approvedCountSuffix}
+                      {pendingGasCount > 0 ? ` • ${pendingGasCount}${t.pendingCountSuffix}` : ''}
                     </div>
                   </div>
 
                   <div className="bg-gradient-to-br from-slate-900 to-emerald-950 text-white p-4 sm:p-5 rounded-2xl shadow-sm">
                     <div className="text-xs font-semibold text-emerald-300">
-                      মালিকের নিট আয়
+                      {t.ownerNetIncome}
                     </div>
                     <div className="text-lg sm:text-2xl font-bold text-white mt-1">
                       {formatBDT(overallTotals.netOwnerProfit)}
                     </div>
                     <div className="text-[11px] text-slate-300 mt-1">
-                      ২৫% ও অনুমোদিত গ্যাস বাদে
+                      {t.after25AndGas}
                     </div>
                   </div>
                 </div>
@@ -2670,11 +3290,11 @@ export default function App() {
                   <div className="bg-emerald-50/80 p-4 rounded-2xl border border-emerald-200 flex items-center justify-between">
                     <div>
                       <div className="text-xs font-semibold text-emerald-800">
-                        মোট আদায়কৃত ভাড়া (Paid • ২৫% ও অবশিষ্ট গ্যাস বাদে)
+                        {t.totalPaidRentCard}
                       </div>
                       <div className="text-[11px] text-emerald-700 mt-0.5">
-                        Paid ভাড়া {formatBDT(overallTotals.paidTotalRents)} − গ্যাস কাটা{' '}
-                        {formatBDT(overallTotals.gasDeductedFromPaid)}
+                        {t.paidRentLabel} {formatBDT(overallTotals.paidTotalRents)} −{' '}
+                        {t.gasDeductedLabel} {formatBDT(overallTotals.gasDeductedFromPaid)}
                       </div>
                     </div>
                     <div className="text-lg sm:text-xl font-bold text-emerald-700">
@@ -2685,11 +3305,11 @@ export default function App() {
                   <div className="bg-rose-50/80 p-4 rounded-2xl border border-rose-200 flex items-center justify-between">
                     <div>
                       <div className="text-xs font-semibold text-rose-800">
-                        মোট বাকি ভাড়া (Unpaid • ২৫% ও অনুমোদিত গ্যাস বাদে)
+                        {t.totalUnpaidRentCard}
                       </div>
                       <div className="text-[11px] text-rose-700 mt-0.5">
-                        ২৫% বাদে {formatBDT(overallTotals.unpaidRentsAfterCommission)} − গ্যাস কাটা{' '}
-                        {formatBDT(overallTotals.gasDeductedFromUnpaid)}
+                        {t.after25Label} {formatBDT(overallTotals.unpaidRentsAfterCommission)} −{' '}
+                        {t.gasDeductedLabel} {formatBDT(overallTotals.gasDeductedFromUnpaid)}
                       </div>
                     </div>
                     <div className="text-lg sm:text-xl font-bold text-rose-700">
@@ -2700,12 +3320,12 @@ export default function App() {
 
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
                   <h3 className="font-bold text-slate-900 mb-3 text-sm sm:text-base">
-                    ড্রাইভারভিত্তিক হিসাব
+                    {t.driverWiseSummary}
                   </h3>
 
                   {drivers.length === 0 ? (
                     <div className="py-8 text-center text-slate-400 text-sm">
-                      কোনো ড্রাইভার যুক্ত নেই। &ldquo;ড্রাইভার&rdquo; ট্যাব থেকে নতুন ড্রাইভার যোগ করুন।
+                      {t.noDriversYet}
                     </div>
                   ) : (
                     <>
@@ -2741,19 +3361,21 @@ export default function App() {
                                       : 'bg-emerald-100 text-emerald-700'
                                   }`}
                                 >
-                                  {drv.active === false ? 'নিষ্ক্রিয়' : 'সক্রিয়'}
+                                  {drv.active === false ? t.inactiveStatus : t.activeStatus}
                                 </span>
                               </div>
                               <div className="grid grid-cols-2 gap-1.5 pt-1 border-t border-slate-200">
-                                <div>ভাড়া: <strong>{formatBDT(sumRent)}</strong></div>
+                                <div>
+                                  {t.tabRents}: <strong>{formatBDT(sumRent)}</strong>
+                                </div>
                                 <div className="text-emerald-700">
-                                  কমিশন: <strong>{formatBDT(sumComm)}</strong>
+                                  {t.commissionPrefix} <strong>{formatBDT(sumComm)}</strong>
                                 </div>
                                 <div className="text-amber-700">
-                                  গ্যাস: <strong>{formatBDT(sumGas)}</strong>
+                                  {t.tabGas}: <strong>{formatBDT(sumGas)}</strong>
                                 </div>
                                 <div className="font-bold text-slate-900">
-                                  নিট আয়: {formatBDT(net)}
+                                  {t.ownerNetIncome}: {formatBDT(net)}
                                 </div>
                               </div>
                             </div>
@@ -2765,13 +3387,13 @@ export default function App() {
                         <table className="w-full text-left border-collapse text-sm">
                           <thead>
                             <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs">
-                              <th className="py-2.5 px-3">ড্রাইভার</th>
-                              <th className="py-2.5 px-3">গাড়ি</th>
-                              <th className="py-2.5 px-3">স্ট্যাটাস</th>
-                              <th className="py-2.5 px-3 text-right">মোট ভাড়া</th>
-                              <th className="py-2.5 px-3 text-right">কমিশন (২৫%)</th>
-                              <th className="py-2.5 px-3 text-right">গ্যাস খরচ</th>
-                              <th className="py-2.5 px-3 text-right">মালিকের নিট আয়</th>
+                              <th className="py-2.5 px-3">{t.driverCol}</th>
+                              <th className="py-2.5 px-3">{t.carCol}</th>
+                              <th className="py-2.5 px-3">{t.statusCol}</th>
+                              <th className="py-2.5 px-3 text-right">{t.totalFareShort}</th>
+                              <th className="py-2.5 px-3 text-right">{t.commission25}</th>
+                              <th className="py-2.5 px-3 text-right">{t.totalGasCost}</th>
+                              <th className="py-2.5 px-3 text-right">{t.ownerNetIncome}</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100">
@@ -2815,7 +3437,7 @@ export default function App() {
                                           : 'bg-emerald-100 text-emerald-700'
                                       }`}
                                     >
-                                      {drv.active === false ? 'নিষ্ক্রিয়' : 'সক্রিয়'}
+                                      {drv.active === false ? t.inactiveStatus : t.activeStatus}
                                     </span>
                                   </td>
                                   <td className="py-3 px-3 text-right font-semibold">
@@ -2846,7 +3468,7 @@ export default function App() {
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 className="font-bold text-slate-900 text-sm sm:text-base">
-                    সকল ভাড়ার তালিকা
+                    {t.allRentsList}
                   </h3>
                   {rents.length > 0 && (
                     <button
@@ -2855,8 +3477,8 @@ export default function App() {
                       className="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                     >
                       {rents.every((r) => selectedRentIds.includes(r.id))
-                        ? 'সব আনসিলেক্ট করুন'
-                        : 'সব সিলেক্ট করুন'}
+                        ? t.deselectAll
+                        : t.selectAll}
                     </button>
                   )}
                 </div>
@@ -2864,7 +3486,10 @@ export default function App() {
                 {selectedRentIds.length > 0 && (
                   <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex flex-wrap items-center justify-between gap-2.5">
                     <div className="text-xs sm:text-sm font-bold text-emerald-950">
-                      {selectedRentIds.length}টি ভাড়া সিলেক্ট করা হয়েছে • ২৫% বাদে মোট:{' '}
+                      {selectedRentIds.length}{' '}
+                      {lang === 'en'
+                        ? 'selected • Net after 25%:'
+                        : 'টি ভাড়া সিলেক্ট করা হয়েছে • ২৫% বাদে মোট:'}{' '}
                       {formatBDT(selectedRentsTotalAmount)}
                     </div>
                     <div className="flex items-center gap-2">
@@ -2873,14 +3498,14 @@ export default function App() {
                         onClick={() => handleMarkRentsPaid(selectedRentIds, true)}
                         className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold"
                       >
-                        সিলেক্টেডগুলো Paid করুন
+                        {t.markSelectedPaid}
                       </button>
                       <button
                         type="button"
                         onClick={() => handleMarkRentsPaid(selectedRentIds, false)}
                         className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold"
                       >
-                        Unpaid করুন
+                        {t.markUnpaid}
                       </button>
                     </div>
                   </div>
@@ -2926,11 +3551,15 @@ export default function App() {
                         <div className="font-bold text-sm text-slate-900">
                           {r.pickupLocation} → {r.dropLocation}
                         </div>
-                        <div className="text-slate-500">যাত্রী: {r.passengerPhone}</div>
+                        <div className="text-slate-500">
+                          {t.passengerPrefix} {r.passengerPhone}
+                        </div>
                         <div className="flex justify-between pt-1.5 border-t border-slate-200 font-semibold">
-                          <span>মোট: {formatBDT(r.totalFare)}</span>
+                          <span>
+                            {t.totalPrefix} {formatBDT(r.totalFare)}
+                          </span>
                           <span className="text-emerald-700">
-                            ২৫% বাদে: {formatBDT(getRentNetAfterCommission(r))}
+                            {t.after25Label} {formatBDT(getRentNetAfterCommission(r))}
                           </span>
                         </div>
                         <div className="flex justify-end gap-2 pt-1">
@@ -2950,21 +3579,21 @@ export default function App() {
                             onClick={() => setEditingRent({ ...r })}
                             className="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 font-semibold flex items-center gap-1"
                           >
-                            <Edit3 className="w-3.5 h-3.5" /> এডিট
+                            <Edit3 className="w-3.5 h-3.5" /> {t.editBtn}
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDeleteRent(r.id)}
                             className="px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700 font-semibold flex items-center gap-1"
                           >
-                            <Trash2 className="w-3.5 h-3.5" /> ডিলিট
+                            <Trash2 className="w-3.5 h-3.5" /> {t.deleteBtn}
                           </button>
                         </div>
                       </div>
                     );
                   })}
                   {rents.length === 0 && (
-                    <div className="py-8 text-center text-slate-400">কোনো ভাড়া নেই।</div>
+                    <div className="py-8 text-center text-slate-400">{t.noRentInPeriod}</div>
                   )}
                 </div>
 
@@ -2982,15 +3611,15 @@ export default function App() {
                             className="w-4 h-4 rounded accent-emerald-600"
                           />
                         </th>
-                        <th className="py-2.5 px-3">তারিখ</th>
-                        <th className="py-2.5 px-3">ড্রাইভার</th>
-                        <th className="py-2.5 px-3">যাত্রা → গন্তব্য</th>
-                        <th className="py-2.5 px-3">স্ট্যাটাস</th>
-                        <th className="py-2.5 px-3">যাত্রীর নম্বর</th>
-                        <th className="py-2.5 px-3 text-right">মোট ভাড়া</th>
-                        <th className="py-2.5 px-3 text-right">২৫% কমিশন</th>
-                        <th className="py-2.5 px-3 text-right">অবশিষ্ট ভাড়া</th>
-                        <th className="py-2.5 px-3 text-center">অ্যাকশন</th>
+                        <th className="py-2.5 px-3">{t.datePrefix.replace(':', '')}</th>
+                        <th className="py-2.5 px-3">{t.driverCol}</th>
+                        <th className="py-2.5 px-3">{t.routeCol}</th>
+                        <th className="py-2.5 px-3">{t.statusCol}</th>
+                        <th className="py-2.5 px-3">{t.passengerCol}</th>
+                        <th className="py-2.5 px-3 text-right">{t.totalFareShort}</th>
+                        <th className="py-2.5 px-3 text-right">{t.commission25}</th>
+                        <th className="py-2.5 px-3 text-right">{t.remainingFare}</th>
+                        <th className="py-2.5 px-3 text-center">{t.actionCol}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -3044,7 +3673,7 @@ export default function App() {
                                 type="button"
                                 onClick={() => setEditingRent({ ...r })}
                                 className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg mr-1"
-                                title="এডিট করুন"
+                                title={t.editBtn}
                               >
                                 <Edit3 className="w-4 h-4" />
                               </button>
@@ -3052,7 +3681,7 @@ export default function App() {
                                 type="button"
                                 onClick={() => handleDeleteRent(r.id)}
                                 className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg"
-                                title="ডিলিট করুন"
+                                title={t.deleteBtn}
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -3063,7 +3692,7 @@ export default function App() {
                       {rents.length === 0 && (
                         <tr>
                           <td colSpan={10} className="py-8 text-center text-slate-400">
-                            এখনো কোনো ভাড়া এন্ট্রি করা হয়নি।
+                            {t.noRentInPeriod}
                           </td>
                         </tr>
                       )}
@@ -3078,10 +3707,10 @@ export default function App() {
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <h3 className="font-bold text-slate-900 text-sm sm:text-base">
-                      সকল গ্যাস খরচ ও অনুমোদন
+                      {t.allGasAndApproval}
                     </h3>
                     <p className="text-xs text-slate-500 mt-0.5">
-                      অ্যাডমিন Approve করলেই গ্যাস খরচ হিসেবে যুক্ত হবে (সব ভাড়া Paid থাকলে Paid ভাড়া থেকে সমন্বয় হবে)
+                      {t.gasApprovalNote}
                     </p>
                   </div>
                   {gasExpenses.length > 0 && (
@@ -3091,8 +3720,8 @@ export default function App() {
                       className="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                     >
                       {gasExpenses.every((g) => selectedGasIds.includes(g.id))
-                        ? 'সব আনসিলেক্ট করুন'
-                        : 'সব সিলেক্ট করুন'}
+                        ? t.deselectAll
+                        : t.selectAll}
                     </button>
                   )}
                 </div>
@@ -3100,7 +3729,10 @@ export default function App() {
                 {selectedGasIds.length > 0 && (
                   <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 flex flex-wrap items-center justify-between gap-2.5">
                     <div className="text-xs sm:text-sm font-bold text-amber-950">
-                      {selectedGasIds.length}টি গ্যাস খরচ সিলেক্ট করা হয়েছে • মোট:{' '}
+                      {selectedGasIds.length}{' '}
+                      {lang === 'en'
+                        ? 'selected • Total:'
+                        : 'টি গ্যাস খরচ সিলেক্ট করা হয়েছে • মোট:'}{' '}
                       {formatBDT(selectedGasTotalAmount)}
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
@@ -3109,28 +3741,28 @@ export default function App() {
                         onClick={() => handleGasApprovalChange(selectedGasIds, 'approved')}
                         className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold"
                       >
-                        Approve করুন
+                        {t.approveBtn}
                       </button>
                       <button
                         type="button"
                         onClick={() => handleGasApprovalChange(selectedGasIds, 'rejected')}
                         className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold"
                       >
-                        Reject করুন
+                        {t.rejectBtn}
                       </button>
                       <button
                         type="button"
                         onClick={() => handleMarkGasPaid(selectedGasIds, true)}
                         className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold"
                       >
-                        Paid করুন
+                        {t.paidBtn}
                       </button>
                       <button
                         type="button"
                         onClick={() => handleMarkGasPaid(selectedGasIds, false)}
                         className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold"
                       >
-                        Unpaid করুন
+                        {t.markUnpaid}
                       </button>
                     </div>
                   </div>
@@ -3235,7 +3867,7 @@ export default function App() {
                                 onClick={() => setReceiptModalUrl(g.receiptImage)}
                                 className="px-2.5 py-1.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 font-semibold"
                               >
-                                রিসিপ্ট
+                                {t.receiptBtn}
                               </button>
                             )}
                             <button
@@ -3251,9 +3883,7 @@ export default function App() {
                     );
                   })}
                   {gasExpenses.length === 0 && (
-                    <div className="py-8 text-center text-slate-400">
-                      কোনো গ্যাস খরচের রেকর্ড নেই।
-                    </div>
+                    <div className="py-8 text-center text-slate-400">{t.noGasInPeriod}</div>
                   )}
                 </div>
 
@@ -3272,14 +3902,14 @@ export default function App() {
                             className="w-4 h-4 rounded accent-amber-600"
                           />
                         </th>
-                        <th className="py-2.5 px-3">তারিখ</th>
-                        <th className="py-2.5 px-3">ড্রাইভার</th>
-                        <th className="py-2.5 px-3">গ্যাস ফিলিং স্টেশন</th>
-                        <th className="py-2.5 px-3">অনুমোদন</th>
-                        <th className="py-2.5 px-3">পেমেন্ট</th>
-                        <th className="py-2.5 px-3 text-right">খরচের পরিমাণ</th>
-                        <th className="py-2.5 px-3 text-center">রিসিপ্ট</th>
-                        <th className="py-2.5 px-3 text-center">অ্যাকশন</th>
+                        <th className="py-2.5 px-3">{t.datePrefix.replace(':', '')}</th>
+                        <th className="py-2.5 px-3">{t.driverCol}</th>
+                        <th className="py-2.5 px-3">{t.stationCol}</th>
+                        <th className="py-2.5 px-3">{t.approvalCol}</th>
+                        <th className="py-2.5 px-3">{t.paymentCol}</th>
+                        <th className="py-2.5 px-3 text-right">{t.amountCol}</th>
+                        <th className="py-2.5 px-3 text-center">{t.receiptBtn}</th>
+                        <th className="py-2.5 px-3 text-center">{t.actionCol}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -3351,10 +3981,10 @@ export default function App() {
                                   className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 text-xs font-semibold"
                                 >
                                   <Eye className="w-3.5 h-3.5" />
-                                  রিসিপ্ট দেখুন
+                                  {t.viewReceiptBtn}
                                 </button>
                               ) : (
-                                <span className="text-xs text-slate-400">ছবি নেই</span>
+                                <span className="text-xs text-slate-400">{t.noPhoto}</span>
                               )}
                             </td>
                             <td className="py-2.5 px-3 text-center whitespace-nowrap">
@@ -3381,7 +4011,7 @@ export default function App() {
                                   type="button"
                                   onClick={() => handleDeleteGas(g.id)}
                                   className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg"
-                                  title="ডিলিট করুন"
+                                  title={t.deleteBtn}
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </button>
@@ -3393,7 +4023,7 @@ export default function App() {
                       {gasExpenses.length === 0 && (
                         <tr>
                           <td colSpan={9} className="py-8 text-center text-slate-400">
-                            এখনো কোনো গ্যাস খরচের রেকর্ড নেই।
+                            {t.noGasInPeriod}
                           </td>
                         </tr>
                       )}
@@ -3410,37 +4040,37 @@ export default function App() {
                   className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 space-y-3 h-fit"
                 >
                   <h3 className="font-bold text-slate-900 text-sm sm:text-base">
-                    নতুন ড্রাইভার যুক্ত করুন
+                    {t.addNewDriverTitle}
                   </h3>
                   <div>
                     <label className="block text-xs font-semibold text-slate-600 mb-1">
-                      ড্রাইভার আইডি *
+                      {t.driverIdLabel}
                     </label>
                     <input
                       type="text"
                       value={newDriverId}
                       onChange={(e) => setNewDriverId(e.target.value)}
-                      placeholder="যেমন: DRV-01"
+                      placeholder="DRV-01"
                       className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm"
                       required
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-600 mb-1">
-                      ড্রাইভারের নাম *
+                      {t.driverNameLabel}
                     </label>
                     <input
                       type="text"
                       value={newDriverName}
                       onChange={(e) => setNewDriverName(e.target.value)}
-                      placeholder="ড্রাইভারের নাম"
+                      placeholder={lang === 'en' ? 'Driver Name' : 'ড্রাইভারের নাম'}
                       className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm"
                       required
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-600 mb-1">
-                      মোবাইল নম্বর *
+                      {t.mobileLabel}
                     </label>
                     <input
                       type="tel"
@@ -3453,19 +4083,19 @@ export default function App() {
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-600 mb-1">
-                      গাড়ির নম্বর
+                      {t.carNumberLabel}
                     </label>
                     <input
                       type="text"
                       value={newDriverCar}
                       onChange={(e) => setNewDriverCar(e.target.value)}
-                      placeholder="গাড়ির নম্বর"
+                      placeholder={lang === 'en' ? 'Car Number' : 'গাড়ির নম্বর'}
                       className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm"
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-600 mb-1">
-                      লগইন পিন (কমপক্ষে ৪ ডিজিট) *
+                      {t.loginPinLabel}
                     </label>
                     <input
                       type="text"
@@ -3480,13 +4110,13 @@ export default function App() {
                     type="submit"
                     className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition"
                   >
-                    ড্রাইভার সেভ করুন
+                    {t.saveDriverBtn}
                   </button>
                 </form>
 
                 <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
                   <h3 className="font-bold text-slate-900 mb-3.5 text-sm sm:text-base">
-                    নিবন্ধিত ড্রাইভার তালিকা
+                    {t.registeredDriversTitle}
                   </h3>
                   <div className="space-y-3">
                     {drivers.map((d) => (
@@ -3507,11 +4137,12 @@ export default function App() {
                                   : 'bg-emerald-100 text-emerald-700'
                               }`}
                             >
-                              {d.active === false ? 'নিষ্ক্রিয়' : 'সক্রিয়'}
+                              {d.active === false ? t.inactiveStatus : t.activeStatus}
                             </span>
                           </div>
                           <div className="text-xs text-slate-500 mt-1">
-                            মোবাইল: {d.phone} • গাড়ি: {d.carNumber} • পিন:{' '}
+                            {t.mobileLabel.replace(' *', '')}: {d.phone} • {t.carCol}: {d.carNumber} •{' '}
+                            {t.pinShort}:{' '}
                             <span className="font-mono font-bold text-slate-700">
                               {d.pin || '1234'}
                             </span>
@@ -3528,7 +4159,7 @@ export default function App() {
                             className="flex-1 sm:flex-initial px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-semibold text-slate-700 flex items-center justify-center gap-1"
                           >
                             <KeyRound className="w-3.5 h-3.5" />
-                            <span>পিন</span>
+                            <span>{t.pinShort}</span>
                           </button>
                           <button
                             type="button"
@@ -3541,11 +4172,11 @@ export default function App() {
                           >
                             {d.active === false ? (
                               <>
-                                <Unlock className="w-3.5 h-3.5" /> <span>সক্রিয়</span>
+                                <Unlock className="w-3.5 h-3.5" /> <span>{t.unlockBtn}</span>
                               </>
                             ) : (
                               <>
-                                <Lock className="w-3.5 h-3.5" /> <span>লক</span>
+                                <Lock className="w-3.5 h-3.5" /> <span>{t.lockBtn}</span>
                               </>
                             )}
                           </button>
@@ -3554,7 +4185,7 @@ export default function App() {
                     ))}
                     {drivers.length === 0 && (
                       <div className="py-8 text-center text-slate-400 text-sm">
-                        এখনো কোনো ড্রাইভার যুক্ত করা হয়নি।
+                        {t.noDriversYet}
                       </div>
                     )}
                   </div>
@@ -3569,30 +4200,30 @@ export default function App() {
                   className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 space-y-3 h-fit"
                 >
                   <h3 className="font-bold text-slate-900 text-sm sm:text-base">
-                    নতুন গ্যাস ফিলিং স্টেশন যোগ করুন
+                    {t.addNewStationTitle}
                   </h3>
                   <div>
                     <label className="block text-xs font-semibold text-slate-600 mb-1">
-                      ফিলিং স্টেশনের নাম *
+                      {t.stationNameLabel}
                     </label>
                     <input
                       type="text"
                       value={newStationName}
                       onChange={(e) => setNewStationName(e.target.value)}
-                      placeholder="ফিলিং স্টেশনের নাম"
+                      placeholder={lang === 'en' ? 'Station Name' : 'ফিলিং স্টেশনের নাম'}
                       className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm"
                       required
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-600 mb-1">
-                      এলাকা / ঠিকানা
+                      {t.stationLocationLabel}
                     </label>
                     <input
                       type="text"
                       value={newStationLocation}
                       onChange={(e) => setNewStationLocation(e.target.value)}
-                      placeholder="এলাকা বা ঠিকানা"
+                      placeholder={lang === 'en' ? 'Area or Address' : 'এলাকা বা ঠিকানা'}
                       className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm"
                     />
                   </div>
@@ -3600,13 +4231,13 @@ export default function App() {
                     type="submit"
                     className="w-full py-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm transition"
                   >
-                    স্টেশন যুক্ত করুন
+                    {t.addStationBtn}
                   </button>
                 </form>
 
                 <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
                   <h3 className="font-bold text-slate-900 mb-3.5 text-sm sm:text-base">
-                    গ্যাস ফিলিং স্টেশন তালিকা
+                    {t.stationListTitle}
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {stations.map((stn) => (
@@ -3625,7 +4256,7 @@ export default function App() {
                           type="button"
                           onClick={() => handleDeleteStation(stn)}
                           className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg shrink-0"
-                          title="মুছে ফেলুন"
+                          title={t.deleteBtn}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -3633,7 +4264,7 @@ export default function App() {
                     ))}
                     {stations.length === 0 && (
                       <div className="col-span-full py-8 text-center text-slate-400 text-sm">
-                        কোনো গ্যাস স্টেশন নেই। বাম পাশ থেকে নতুন স্টেশন যোগ করুন।
+                        {t.noStationsYet}
                       </div>
                     )}
                   </div>
@@ -3647,13 +4278,23 @@ export default function App() {
                   <div className="flex items-center gap-2">
                     <Database className="w-5 h-5 text-emerald-600" />
                     <h3 className="font-bold text-slate-900 text-sm sm:text-base">
-                      ডাটাবেজ ব্যাকআপ ও সুরক্ষা
+                      {t.dbBackupTitle}
                     </h3>
                   </div>
                   <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                    আপনার সকল ভাড়া, গ্যাস খরচ, রিসিপ্ট ও ড্রাইভারের তথ্য{' '}
-                    <strong>{firebaseConfig.projectId}</strong> Firestore ডাটাবেজে সংরক্ষিত আছে।
-                    যেকোনো সময় সম্পূর্ণ ডাটার JSON ব্যাকআপ ডাউনলোড করতে পারেন।
+                    {lang === 'en' ? (
+                      <>
+                        All rents, gas expenses, receipts, and driver records are securely stored in{' '}
+                        <strong>{firebaseConfig.projectId}</strong> Firestore. You can download a full
+                        JSON backup anytime.
+                      </>
+                    ) : (
+                      <>
+                        আপনার সকল ভাড়া, গ্যাস খরচ, রিসিপ্ট ও ড্রাইভারের তথ্য{' '}
+                        <strong>{firebaseConfig.projectId}</strong> Firestore ডাটাবেজে সংরক্ষিত আছে।
+                        যেকোনো সময় সম্পূর্ণ ডাটার JSON ব্যাকআপ ডাউনলোড করতে পারেন।
+                      </>
+                    )}
                   </p>
 
                   <button
@@ -3662,12 +4303,12 @@ export default function App() {
                     className="w-full sm:w-auto px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold flex items-center justify-center gap-2 transition"
                   >
                     <Download className="w-4 h-4" />
-                    <span>JSON ব্যাকআপ ডাউনলোড</span>
+                    <span>{t.downloadJsonBackup}</span>
                   </button>
 
                   <div className="pt-3 border-t border-slate-100">
                     <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                      সাম্প্রতিক অডিট লগ
+                      {t.recentAuditLogs}
                     </h4>
                     <div className="space-y-2 max-h-56 overflow-y-auto pr-0.5">
                       {auditLogs.map((log) => (
@@ -3701,12 +4342,12 @@ export default function App() {
                       {copiedRules ? (
                         <>
                           <Check className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>কপি হয়েছে</span>
+                          <span>{t.copiedBtn}</span>
                         </>
                       ) : (
                         <>
                           <Copy className="w-3.5 h-3.5" />
-                          <span>কপি করুন</span>
+                          <span>{t.copyBtn}</span>
                         </>
                       )}
                     </button>
@@ -3726,8 +4367,8 @@ export default function App() {
         href={whatsappUrl}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="WhatsApp-এ যোগাযোগ করুন"
-        title="WhatsApp-এ যোগাযোগ করুন"
+        aria-label="WhatsApp"
+        title="WhatsApp"
         className="no-print fixed bottom-20 sm:bottom-5 right-3.5 sm:right-5 z-40 flex items-center gap-2 px-3.5 py-3 rounded-full bg-[#25D366] hover:bg-[#1ebe5d] active:scale-95 text-white font-bold text-xs sm:text-sm shadow-xl transition"
       >
         <MessageCircle className="w-5 h-5 shrink-0" />
@@ -3747,7 +4388,7 @@ export default function App() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
-              <h3 className="font-bold text-slate-900">গ্যাস রিসিপ্টের ছবি</h3>
+              <h3 className="font-bold text-slate-900">{t.gasReceiptModalTitle}</h3>
               <button
                 type="button"
                 onClick={() => setReceiptModalUrl(null)}
@@ -3759,7 +4400,7 @@ export default function App() {
             <div className="flex justify-center bg-slate-50 rounded-xl p-2">
               <img
                 src={receiptModalUrl}
-                alt="গ্যাস রিসিপ্ট"
+                alt="Gas Receipt"
                 className="max-h-[70vh] rounded-lg object-contain"
               />
             </div>
@@ -3778,7 +4419,7 @@ export default function App() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-              <h3 className="font-bold text-slate-900">ভাড়ার তথ্য এডিট করুন</h3>
+              <h3 className="font-bold text-slate-900">{t.editRentModalTitle}</h3>
               <button
                 type="button"
                 onClick={() => setEditingRent(null)}
@@ -3790,7 +4431,7 @@ export default function App() {
 
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1">
-                যাত্রা লোকেশন
+                {t.pickupLabel.replace(' *', '')}
               </label>
               <input
                 type="text"
@@ -3805,7 +4446,7 @@ export default function App() {
 
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1">
-                গন্তব্য লোকেশন
+                {t.dropLabel.replace(' *', '')}
               </label>
               <input
                 type="text"
@@ -3821,7 +4462,7 @@ export default function App() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="min-w-0">
                 <label className="block text-xs font-semibold text-slate-600 mb-1">
-                  মোট ভাড়া (টাকা)
+                  {t.totalFareLabel.replace(' *', '')}
                 </label>
                 <input
                   type="number"
@@ -3835,7 +4476,7 @@ export default function App() {
               </div>
               <div className="min-w-0">
                 <label className="block text-xs font-semibold text-slate-600 mb-1">
-                  তারিখ
+                  {t.datePrefix.replace(':', '')}
                 </label>
                 <input
                   type="date"
@@ -3850,7 +4491,7 @@ export default function App() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">
-                  যাত্রীর নম্বর
+                  {t.passengerCol}
                 </label>
                 <input
                   type="text"
@@ -3864,15 +4505,15 @@ export default function App() {
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">
-                  ভাড়ার ধরন
+                  {t.tripTypeLabel.replace(' *', '')}
                 </label>
                 <select
                   value={editingRent.tripType}
                   onChange={(e) => setEditingRent({ ...editingRent, tripType: e.target.value })}
                   className="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white"
                 >
-                  <option value="one-way">শুধু যাওয়া</option>
-                  <option value="round-trip">আসা-যাওয়া</option>
+                  <option value="one-way">{t.oneWay}</option>
+                  <option value="round-trip">{t.roundTrip}</option>
                 </select>
               </div>
             </div>
@@ -3883,13 +4524,13 @@ export default function App() {
                 onClick={() => setEditingRent(null)}
                 className="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600"
               >
-                বাতিল
+                {t.cancelBtn}
               </button>
               <button
                 type="submit"
                 className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold"
               >
-                আপডেট সেভ করুন
+                {t.saveChangesBtn}
               </button>
             </div>
           </form>
@@ -3907,7 +4548,7 @@ export default function App() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-              <h3 className="font-bold text-slate-900">ড্রাইভার পিন রিসেট</h3>
+              <h3 className="font-bold text-slate-900">{t.resetPinModalTitle}</h3>
               <button
                 type="button"
                 onClick={() => setEditingDriverPin(null)}
@@ -3917,11 +4558,11 @@ export default function App() {
               </button>
             </div>
             <p className="text-xs text-slate-600">
-              ড্রাইভার: <strong>{editingDriverPin.name}</strong> ({editingDriverPin.id})
+              {t.driverCol}: <strong>{editingDriverPin.name}</strong> ({editingDriverPin.id})
             </p>
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                নতুন পিন (কমপক্ষে ৪ ডিজিট) *
+                {t.newPinLabel}
               </label>
               <input
                 type="text"
@@ -3937,13 +4578,13 @@ export default function App() {
                 onClick={() => setEditingDriverPin(null)}
                 className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600"
               >
-                বাতিল
+                {t.cancelBtn}
               </button>
               <button
                 type="submit"
                 className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold"
               >
-                সংরক্ষণ করুন
+                {t.saveBtn}
               </button>
             </div>
           </form>
