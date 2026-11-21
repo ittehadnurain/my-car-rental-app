@@ -203,6 +203,7 @@ export default function App() {
   const [newPinValue, setNewPinValue] = useState('');
   const [copiedRules, setCopiedRules] = useState(false);
   const [selectedRentIds, setSelectedRentIds] = useState([]);
+  const [selectedGasIds, setSelectedGasIds] = useState([]);
 
   // Firestore Data States
   const [drivers, setDrivers] = useState([]);
@@ -468,6 +469,7 @@ export default function App() {
     setCurrentUser(null);
     setLoginError('');
     setSelectedRentIds([]);
+    setSelectedGasIds([]);
     showToast('সফলভাবে লগ আউট করা হয়েছে');
   };
 
@@ -535,7 +537,7 @@ export default function App() {
     }
   };
 
-  // Selection & Paid Status Handlers
+  // Rent Selection & Paid Status Handlers
   const toggleSelectRent = (id) => {
     setSelectedRentIds((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
@@ -598,6 +600,69 @@ export default function App() {
     }
   };
 
+  // Gas Selection & Paid Status Handlers
+  const toggleSelectGas = (id) => {
+    setSelectedGasIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAllGas = (visibleGas) => {
+    const visibleIds = visibleGas.map((g) => g.id);
+    const allSelected =
+      visibleIds.length > 0 && visibleIds.every((id) => selectedGasIds.includes(id));
+    if (allSelected) {
+      setSelectedGasIds((prev) => prev.filter((id) => !visibleIds.includes(id)));
+    } else {
+      setSelectedGasIds((prev) => Array.from(new Set([...prev, ...visibleIds])));
+    }
+  };
+
+  const handleMarkGasPaid = async (targetIds = selectedGasIds, nextPaidStatus = true) => {
+    if (currentUser?.role !== 'admin') {
+      showToast('শুধুমাত্র অ্যাডমিন গ্যাস খরচের Paid স্ট্যাটাস আপডেট করতে পারবেন', 'error');
+      return;
+    }
+    if (!targetIds || targetIds.length === 0) {
+      showToast('আগে অন্তত একটি গ্যাস খরচ সিলেক্ট করুন', 'error');
+      return;
+    }
+
+    const paidTimestamp = nextPaidStatus ? new Date().toISOString() : null;
+
+    try {
+      for (const gasId of targetIds) {
+        if (isFirebaseReady && db && !String(gasId).startsWith('GAS-')) {
+          await updateDoc(doc(db, 'gas_expenses', gasId), {
+            isPaid: nextPaidStatus,
+            paidAt: paidTimestamp
+          });
+        }
+      }
+
+      setGasExpenses((prev) =>
+        prev.map((g) =>
+          targetIds.includes(g.id) ? { ...g, isPaid: nextPaidStatus, paidAt: paidTimestamp } : g
+        )
+      );
+
+      await writeAuditLog(
+        `অ্যাডমিন ${targetIds.length}টি গ্যাস খরচ ${nextPaidStatus ? 'Paid' : 'Unpaid'} মার্ক করেছেন`,
+        currentUser?.name || 'Admin'
+      );
+
+      setSelectedGasIds((prev) => prev.filter((id) => !targetIds.includes(id)));
+      showToast(
+        nextPaidStatus
+          ? `${targetIds.length}টি গ্যাস খরচে Paid ট্যাগ লাগানো হয়েছে`
+          : `${targetIds.length}টি গ্যাস খরচ Unpaid করা হয়েছে`
+      );
+    } catch (err) {
+      console.error(err);
+      showToast('গ্যাস খরচের Paid স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে', 'error');
+    }
+  };
+
   // Receipt File Change Handler
   const handleReceiptChange = async (e) => {
     const file = e.target.files?.[0];
@@ -651,6 +716,8 @@ export default function App() {
       receiptImage: receiptBase64,
       receiptFileName: receiptFileName || 'receipt.jpg',
       expenseDate: gasDate,
+      isPaid: false,
+      paidAt: null,
       locked: true,
       createdBy: currentUser?.role || 'driver',
       createdAt: new Date().toISOString(),
@@ -747,6 +814,7 @@ export default function App() {
         await deleteDoc(doc(db, 'gas_expenses', gasId));
       }
       setGasExpenses((prev) => prev.filter((g) => g.id !== gasId));
+      setSelectedGasIds((prev) => prev.filter((id) => id !== gasId));
       await writeAuditLog(`অ্যাডমিন গ্যাস খরচ ডিলিট করেছেন: ID ${gasId}`, 'Admin');
       showToast('গ্যাস খরচের রেকর্ড মুছে ফেলা হয়েছে');
     } catch (err) {
@@ -934,7 +1002,7 @@ export default function App() {
     setTimeout(() => setCopiedRules(false), 2500);
   };
 
-  // Filtered Rents & Gas Expenses for Summary Report (25% commission deducted for Paid & Unpaid amounts)
+  // Filtered Rents & Gas Expenses for Summary Report
   const filteredSummary = useMemo(() => {
     const isAllDrivers = currentUser?.role === 'admin' && reportScope === 'all';
     const targetId = currentUser?.role === 'driver' ? currentUser.driverId : selectedDriverId;
@@ -968,6 +1036,12 @@ export default function App() {
     const paidRentAmount = paidRents.reduce((acc, r) => acc + getRentNetAfterCommission(r), 0);
     const unpaidRentAmount = unpaidRents.reduce((acc, r) => acc + getRentNetAfterCommission(r), 0);
 
+    const paidGasEntries = matchingGas.filter((g) => Boolean(g.isPaid));
+    const unpaidGasEntries = matchingGas.filter((g) => !g.isPaid);
+
+    const paidGasAmount = paidGasEntries.reduce((acc, g) => acc + (Number(g.amount) || 0), 0);
+    const unpaidGasAmount = unpaidGasEntries.reduce((acc, g) => acc + (Number(g.amount) || 0), 0);
+
     const totalRentAmount = matchingRents.reduce((acc, r) => acc + (Number(r.totalFare) || 0), 0);
     const totalDriverCommission = matchingRents.reduce(
       (acc, r) => acc + (Number(r.driverCommission) || 0),
@@ -989,6 +1063,10 @@ export default function App() {
       unpaidRentGrossAmount,
       paidRentAmount,
       unpaidRentAmount,
+      paidGasEntries,
+      unpaidGasEntries,
+      paidGasAmount,
+      unpaidGasAmount,
       totalRentAmount,
       totalDriverCommission,
       totalRemainingFare,
@@ -997,7 +1075,7 @@ export default function App() {
     };
   }, [rents, gasExpenses, currentUser, reportScope, selectedDriverId, startDate, endDate]);
 
-  // Overall Admin Totals (25% commission deducted for Paid & Unpaid amounts)
+  // Overall Admin Totals
   const overallTotals = useMemo(() => {
     const totalRents = rents.reduce((sum, r) => sum + (Number(r.totalFare) || 0), 0);
     const totalCommission = rents.reduce((sum, r) => sum + (Number(r.driverCommission) || 0), 0);
@@ -1012,6 +1090,13 @@ export default function App() {
       .filter((r) => !r.isPaid)
       .reduce((sum, r) => sum + getRentNetAfterCommission(r), 0);
 
+    const paidTotalGas = gasExpenses
+      .filter((g) => Boolean(g.isPaid))
+      .reduce((sum, g) => sum + (Number(g.amount) || 0), 0);
+    const unpaidTotalGas = gasExpenses
+      .filter((g) => !g.isPaid)
+      .reduce((sum, g) => sum + (Number(g.amount) || 0), 0);
+
     return {
       totalRents,
       totalCommission,
@@ -1019,7 +1104,9 @@ export default function App() {
       totalGas,
       netOwnerProfit,
       paidTotalRents,
-      unpaidTotalRents
+      unpaidTotalRents,
+      paidTotalGas,
+      unpaidTotalGas
     };
   }, [rents, gasExpenses]);
 
@@ -1028,6 +1115,12 @@ export default function App() {
       .filter((r) => selectedRentIds.includes(r.id))
       .reduce((sum, r) => sum + getRentNetAfterCommission(r), 0);
   }, [rents, selectedRentIds]);
+
+  const selectedGasTotalAmount = useMemo(() => {
+    return gasExpenses
+      .filter((g) => selectedGasIds.includes(g.id))
+      .reduce((sum, g) => sum + (Number(g.amount) || 0), 0);
+  }, [gasExpenses, selectedGasIds]);
 
   const handlePrintReport = () => {
     try {
@@ -1809,9 +1902,18 @@ export default function App() {
                       className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/80 flex items-center justify-between gap-3"
                     >
                       <div className="min-w-0">
-                        <div className="text-xs text-slate-500 flex items-center gap-1">
+                        <div className="text-xs text-slate-500 flex items-center gap-1.5">
                           {g.expenseDate}
                           <Lock className="w-3 h-3 text-slate-400" />
+                          <span
+                            className={`px-2 py-0.5 rounded-full font-semibold ${
+                              g.isPaid
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : 'bg-amber-100 text-amber-800'
+                            }`}
+                          >
+                            {g.isPaid ? 'Paid' : 'Unpaid'}
+                          </span>
                         </div>
                         <div className="font-semibold text-sm text-slate-800 mt-0.5 truncate">
                           {g.stationName}
@@ -2031,8 +2133,8 @@ export default function App() {
                 )}
               </div>
 
-              {/* Paid vs Unpaid Summary Cards (25% Driver Commission Deducted) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+              {/* Paid vs Unpaid Rent Summary Cards (25% Driver Commission Deducted) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                 <div className="p-3.5 rounded-xl bg-emerald-50/80 border border-emerald-200 flex items-center justify-between gap-2">
                   <div>
                     <div className="text-xs font-semibold text-emerald-800">
@@ -2060,6 +2162,37 @@ export default function App() {
                   </div>
                   <div className="text-base sm:text-lg font-bold text-rose-700">
                     {formatBDT(filteredSummary.unpaidRentAmount)}
+                  </div>
+                </div>
+              </div>
+
+              {/* Paid vs Unpaid Gas Expense Summary Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                <div className="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200 flex items-center justify-between gap-2">
+                  <div>
+                    <div className="text-xs font-semibold text-amber-900">
+                      পরিশোধিত গ্যাস খরচ (Paid Gas)
+                    </div>
+                    <div className="text-[11px] text-amber-800/80 mt-0.5">
+                      {filteredSummary.paidGasEntries.length}টি এন্ট্রি Paid হয়েছে
+                    </div>
+                  </div>
+                  <div className="text-base sm:text-lg font-bold text-amber-800">
+                    {formatBDT(filteredSummary.paidGasAmount)}
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-slate-100/80 border border-slate-200 flex items-center justify-between gap-2">
+                  <div>
+                    <div className="text-xs font-semibold text-slate-800">
+                      বাকি গ্যাস খরচ (Unpaid Gas)
+                    </div>
+                    <div className="text-[11px] text-slate-600 mt-0.5">
+                      {filteredSummary.unpaidGasEntries.length}টি এন্ট্রি Unpaid আছে
+                    </div>
+                  </div>
+                  <div className="text-base sm:text-lg font-bold text-slate-800">
+                    {formatBDT(filteredSummary.unpaidGasAmount)}
                   </div>
                 </div>
               </div>
@@ -2185,7 +2318,18 @@ export default function App() {
                     className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 flex items-center justify-between gap-2 text-xs"
                   >
                     <div>
-                      <div className="text-slate-500">{g.expenseDate}</div>
+                      <div className="text-slate-500 flex items-center gap-1.5">
+                        <span>{g.expenseDate}</span>
+                        <span
+                          className={`px-2 py-0.5 rounded-full font-semibold ${
+                            g.isPaid
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : 'bg-amber-100 text-amber-800'
+                          }`}
+                        >
+                          {g.isPaid ? 'Paid' : 'Unpaid'}
+                        </span>
+                      </div>
                       <div className="font-bold text-sm text-slate-900 mt-0.5">{g.stationName}</div>
                       <div className="font-bold text-amber-700 mt-1">{formatBDT(g.amount)}</div>
                     </div>
@@ -2215,6 +2359,7 @@ export default function App() {
                       <th className="py-2.5 px-3">তারিখ</th>
                       {isAdmin && reportScope === 'all' && <th className="py-2.5 px-3">ড্রাইভার</th>}
                       <th className="py-2.5 px-3">গ্যাস ফিলিং স্টেশন</th>
+                      <th className="py-2.5 px-3">স্ট্যাটাস</th>
                       <th className="py-2.5 px-3 text-right">খরচের পরিমাণ</th>
                       <th className="py-2.5 px-3 text-center no-print">রিসিপ্ট</th>
                     </tr>
@@ -2227,6 +2372,17 @@ export default function App() {
                           <td className="py-2.5 px-3 font-medium">{g.driverName || g.driverId}</td>
                         )}
                         <td className="py-2.5 px-3 font-medium text-slate-800">{g.stationName}</td>
+                        <td className="py-2.5 px-3 whitespace-nowrap">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                              g.isPaid
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : 'bg-amber-100 text-amber-800'
+                            }`}
+                          >
+                            {g.isPaid ? 'Paid' : 'Unpaid'}
+                          </span>
+                        </td>
                         <td className="py-2.5 px-3 text-right font-semibold text-amber-700">
                           {formatBDT(g.amount)}
                         </td>
@@ -2249,7 +2405,7 @@ export default function App() {
                     {filteredSummary.matchingGas.length === 0 && (
                       <tr>
                         <td
-                          colSpan={isAdmin && reportScope === 'all' ? 5 : 4}
+                          colSpan={isAdmin && reportScope === 'all' ? 6 : 5}
                           className="py-6 text-center text-slate-400"
                         >
                           এই সময়কালে কোনো গ্যাস খরচের তথ্য পাওয়া যায়নি।
@@ -2336,7 +2492,7 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Overall Paid vs Unpaid Cards (25% Driver Commission Deducted) */}
+                {/* Overall Paid vs Unpaid Rent Cards (25% Driver Commission Deducted) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="bg-emerald-50/80 p-4 rounded-2xl border border-emerald-200 flex items-center justify-between">
                     <div>
@@ -2363,6 +2519,37 @@ export default function App() {
                     </div>
                     <div className="text-lg sm:text-xl font-bold text-rose-700">
                       {formatBDT(overallTotals.unpaidTotalRents)}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Overall Paid vs Unpaid Gas Expense Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="bg-amber-50/80 p-4 rounded-2xl border border-amber-200 flex items-center justify-between">
+                    <div>
+                      <div className="text-xs font-semibold text-amber-900">
+                        মোট পরিশোধিত গ্যাস খরচ (Paid Gas)
+                      </div>
+                      <div className="text-[11px] text-amber-800 mt-0.5">
+                        Paid ট্যাগ দেওয়া গ্যাস খরচের যোগফল
+                      </div>
+                    </div>
+                    <div className="text-lg sm:text-xl font-bold text-amber-800">
+                      {formatBDT(overallTotals.paidTotalGas)}
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-100/80 p-4 rounded-2xl border border-slate-200 flex items-center justify-between">
+                    <div>
+                      <div className="text-xs font-semibold text-slate-800">
+                        মোট বাকি গ্যাস খরচ (Unpaid Gas)
+                      </div>
+                      <div className="text-[11px] text-slate-600 mt-0.5">
+                        Unpaid থাকা গ্যাস খরচের যোগফল
+                      </div>
+                    </div>
+                    <div className="text-lg sm:text-xl font-bold text-slate-800">
+                      {formatBDT(overallTotals.unpaidTotalGas)}
                     </div>
                   </div>
                 </div>
@@ -2545,7 +2732,7 @@ export default function App() {
                       <button
                         type="button"
                         onClick={() => handleMarkRentsPaid(selectedRentIds, false)}
-                        className="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold"
+                        className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold"
                       >
                         Unpaid করুন
                       </button>
@@ -2741,46 +2928,123 @@ export default function App() {
             )}
 
             {adminSubTab === 'gas' && (
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
-                <h3 className="font-bold text-slate-900 mb-3.5 text-sm sm:text-base">
-                  সকল গ্যাস খরচ ও রিসিপ্ট
-                </h3>
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="font-bold text-slate-900 text-sm sm:text-base">
+                    সকল গ্যাস খরচ ও রিসিপ্ট
+                  </h3>
+                  {gasExpenses.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => toggleSelectAllGas(gasExpenses)}
+                      className="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      {gasExpenses.every((g) => selectedGasIds.includes(g.id))
+                        ? 'সব আনসিলেক্ট করুন'
+                        : 'সব সিলেক্ট করুন'}
+                    </button>
+                  )}
+                </div>
+
+                {selectedGasIds.length > 0 && (
+                  <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 flex flex-wrap items-center justify-between gap-2.5">
+                    <div className="text-xs sm:text-sm font-bold text-amber-950">
+                      {selectedGasIds.length}টি গ্যাস খরচ সিলেক্ট করা হয়েছে • মোট:{' '}
+                      {formatBDT(selectedGasTotalAmount)}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleMarkGasPaid(selectedGasIds, true)}
+                        className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold"
+                      >
+                        সিলেক্টেডগুলো Paid করুন
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleMarkGasPaid(selectedGasIds, false)}
+                        className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold"
+                      >
+                        Unpaid করুন
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 <div className="sm:hidden space-y-3">
-                  {gasExpenses.map((g) => (
-                    <div
-                      key={g.id}
-                      className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 flex items-center justify-between gap-2 text-xs"
-                    >
-                      <div>
-                        <div className="text-slate-500">
-                          {g.expenseDate} • {g.driverName || g.driverId}
-                        </div>
-                        <div className="font-bold text-sm text-slate-900 mt-0.5">
-                          {g.stationName}
-                        </div>
-                        <div className="font-bold text-amber-700 mt-1">{formatBDT(g.amount)}</div>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        {g.receiptImage && (
-                          <button
-                            type="button"
-                            onClick={() => setReceiptModalUrl(g.receiptImage)}
-                            className="px-2.5 py-2 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 font-semibold"
+                  {gasExpenses.map((g) => {
+                    const isChecked = selectedGasIds.includes(g.id);
+                    return (
+                      <div
+                        key={g.id}
+                        className={`p-3.5 rounded-xl border text-xs space-y-2 transition ${
+                          isChecked
+                            ? 'border-amber-400 bg-amber-50/40'
+                            : 'border-slate-200 bg-slate-50/70'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <label className="flex items-center gap-2 cursor-pointer text-slate-500">
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => toggleSelectGas(g.id)}
+                              className="w-4 h-4 rounded accent-amber-600"
+                            />
+                            <span>
+                              {g.expenseDate} • {g.driverName || g.driverId}
+                            </span>
+                          </label>
+                          <span
+                            className={`px-2 py-0.5 rounded-full font-semibold ${
+                              g.isPaid
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : 'bg-amber-100 text-amber-800'
+                            }`}
                           >
-                            রিসিপ্ট
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteGas(g.id)}
-                          className="p-2 rounded-lg bg-rose-50 text-rose-600"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                            {g.isPaid ? 'Paid' : 'Unpaid'}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <div>
+                            <div className="font-bold text-sm text-slate-900">{g.stationName}</div>
+                            <div className="font-bold text-amber-700 mt-0.5">
+                              {formatBDT(g.amount)}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleMarkGasPaid([g.id], !g.isPaid)}
+                              className={`px-2.5 py-1.5 rounded-lg font-semibold ${
+                                g.isPaid
+                                  ? 'bg-amber-50 text-amber-800'
+                                  : 'bg-emerald-50 text-emerald-700'
+                              }`}
+                            >
+                              {g.isPaid ? 'Unpaid' : 'Paid'}
+                            </button>
+                            {g.receiptImage && (
+                              <button
+                                type="button"
+                                onClick={() => setReceiptModalUrl(g.receiptImage)}
+                                className="px-2.5 py-1.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 font-semibold"
+                              >
+                                রিসিপ্ট
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteGas(g.id)}
+                              className="p-2 rounded-lg bg-rose-50 text-rose-600"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                   {gasExpenses.length === 0 && (
                     <div className="py-8 text-center text-slate-400">
                       কোনো গ্যাস খরচের রেকর্ড নেই।
@@ -2792,54 +3056,93 @@ export default function App() {
                   <table className="w-full text-left border-collapse text-sm">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs">
+                        <th className="py-2.5 px-3 w-10">
+                          <input
+                            type="checkbox"
+                            checked={
+                              gasExpenses.length > 0 &&
+                              gasExpenses.every((g) => selectedGasIds.includes(g.id))
+                            }
+                            onChange={() => toggleSelectAllGas(gasExpenses)}
+                            className="w-4 h-4 rounded accent-amber-600"
+                          />
+                        </th>
                         <th className="py-2.5 px-3">তারিখ</th>
                         <th className="py-2.5 px-3">ড্রাইভার</th>
                         <th className="py-2.5 px-3">গ্যাস ফিলিং স্টেশন</th>
+                        <th className="py-2.5 px-3">স্ট্যাটাস</th>
                         <th className="py-2.5 px-3 text-right">খরচের পরিমাণ</th>
                         <th className="py-2.5 px-3 text-center">রিসিপ্ট</th>
                         <th className="py-2.5 px-3 text-center">ডিলিট</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {gasExpenses.map((g) => (
-                        <tr key={g.id} className="hover:bg-slate-50">
-                          <td className="py-2.5 px-3 whitespace-nowrap">{g.expenseDate}</td>
-                          <td className="py-2.5 px-3 font-medium whitespace-nowrap">
-                            {g.driverName || g.driverId}
-                          </td>
-                          <td className="py-2.5 px-3">{g.stationName}</td>
-                          <td className="py-2.5 px-3 text-right font-bold text-amber-700">
-                            {formatBDT(g.amount)}
-                          </td>
-                          <td className="py-2.5 px-3 text-center">
-                            {g.receiptImage ? (
+                      {gasExpenses.map((g) => {
+                        const isChecked = selectedGasIds.includes(g.id);
+                        return (
+                          <tr
+                            key={g.id}
+                            className={isChecked ? 'bg-amber-50/40' : 'hover:bg-slate-50'}
+                          >
+                            <td className="py-2.5 px-3">
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() => toggleSelectGas(g.id)}
+                                className="w-4 h-4 rounded accent-amber-600"
+                              />
+                            </td>
+                            <td className="py-2.5 px-3 whitespace-nowrap">{g.expenseDate}</td>
+                            <td className="py-2.5 px-3 font-medium whitespace-nowrap">
+                              {g.driverName || g.driverId}
+                            </td>
+                            <td className="py-2.5 px-3">{g.stationName}</td>
+                            <td className="py-2.5 px-3 whitespace-nowrap">
                               <button
                                 type="button"
-                                onClick={() => setReceiptModalUrl(g.receiptImage)}
-                                className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 text-xs font-semibold"
+                                onClick={() => handleMarkGasPaid([g.id], !g.isPaid)}
+                                className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                                  g.isPaid
+                                    ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                                    : 'bg-amber-100 text-amber-800 hover:bg-amber-200'
+                                }`}
                               >
-                                <Eye className="w-3.5 h-3.5" />
-                                রিসিপ্ট দেখুন
+                                {g.isPaid ? 'Paid' : 'Unpaid'}
                               </button>
-                            ) : (
-                              <span className="text-xs text-slate-400">ছবি নেই</span>
-                            )}
-                          </td>
-                          <td className="py-2.5 px-3 text-center">
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteGas(g.id)}
-                              className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg"
-                              title="ডিলিট করুন"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
+                            </td>
+                            <td className="py-2.5 px-3 text-right font-bold text-amber-700">
+                              {formatBDT(g.amount)}
+                            </td>
+                            <td className="py-2.5 px-3 text-center">
+                              {g.receiptImage ? (
+                                <button
+                                  type="button"
+                                  onClick={() => setReceiptModalUrl(g.receiptImage)}
+                                  className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 text-xs font-semibold"
+                                >
+                                  <Eye className="w-3.5 h-3.5" />
+                                  রিসিপ্ট দেখুন
+                                </button>
+                              ) : (
+                                <span className="text-xs text-slate-400">ছবি নেই</span>
+                              )}
+                            </td>
+                            <td className="py-2.5 px-3 text-center">
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteGas(g.id)}
+                                className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg"
+                                title="ডিলিট করুন"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
                       {gasExpenses.length === 0 && (
                         <tr>
-                          <td colSpan={6} className="py-8 text-center text-slate-400">
+                          <td colSpan={8} className="py-8 text-center text-slate-400">
                             এখনো কোনো গ্যাস খরচের রেকর্ড নেই।
                           </td>
                         </tr>
