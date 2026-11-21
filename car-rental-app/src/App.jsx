@@ -72,7 +72,7 @@ const DEFAULT_DRIVERS = [];
 const DEFAULT_STATIONS = [];
 
 const DEFAULT_ADMIN_CREDS = {
-  email: 'ittehadnurain@gmail.com',
+  email: 'ittehadnurain2007@gmail.com',
   password: 'Ittehad97'
 };
 
