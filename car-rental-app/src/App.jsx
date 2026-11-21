@@ -1327,8 +1327,8 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4">
-                  <div>
+                <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 sm:gap-3.5 items-end">
+                  <div className="sm:col-span-2 min-w-0">
                     <label className="block text-sm font-semibold text-slate-700 mb-1">
                       মোট ভাড়া (টাকা) *
                     </label>
@@ -1345,7 +1345,7 @@ export default function App() {
                     />
                   </div>
 
-                  <div>
+                  <div className="sm:col-span-2 min-w-0">
                     <label className="block text-sm font-semibold text-slate-700 mb-1">
                       যাত্রীর মোবাইল নম্বর *
                     </label>
@@ -1363,17 +1363,18 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="min-w-0">
-                    <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  {/* Compact Rent Date Section */}
+                  <div className="sm:col-span-1 min-w-0">
+                    <label className="block text-xs font-semibold text-slate-700 mb-1 truncate">
                       ভাড়ার তারিখ *
                     </label>
                     <div className="relative">
-                      <Calendar className="w-4 h-4 text-slate-400 left-3.5 top-3.5 absolute" />
+                      <Calendar className="w-3.5 h-3.5 text-slate-400 left-2.5 top-3.5 absolute pointer-events-none" />
                       <input
                         type="date"
                         value={rentDate}
                         onChange={(e) => setRentDate(e.target.value)}
-                        className="w-full min-w-0 pl-10 pr-3.5 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm sm:text-base bg-white"
+                        className="w-full min-w-0 pl-8 pr-2 py-2.5 sm:py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-xs sm:text-sm bg-white"
                         required
                       />
                     </div>
