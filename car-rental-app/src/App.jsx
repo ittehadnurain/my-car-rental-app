@@ -74,11 +74,13 @@ const DEFAULT_STATIONS = [];
 const ADMIN_USERS = [
   {
     email: 'ittehadnurain2007@gmail.com',
+    phone: '01877695700',
     password: 'Ittehad97',
     name: 'প্রথম অ্যাডমিন'
   },
   {
     email: '01858050997',
+    phone: '01858050997',
     password: '01858050997',
     name: 'দ্বিতীয় অ্যাডমিন'
   }
@@ -417,26 +419,29 @@ export default function App() {
   const handleAdminLogin = (e) => {
   e.preventDefault();
   setLoginError('');
-  const cleanEmail = adminLoginEmail.trim().toLowerCase();
+  const cleanInput = adminLoginEmail.trim().toLowerCase();
   const cleanPass = adminLoginPassword.trim();
 
   const matchedAdmin = ADMIN_USERS.find(
-    (adm) => adm.email.toLowerCase() === cleanEmail && adm.password === cleanPass
+    (adm) =>
+      (adm.email.toLowerCase() === cleanInput || adm.phone.trim() === adminLoginEmail.trim()) &&
+      adm.password === cleanPass
   );
 
   if (matchedAdmin) {
     const sessionData = {
       role: 'admin',
       email: matchedAdmin.email,
+      phone: matchedAdmin.phone,
       name: matchedAdmin.name
     };
     setCurrentUser(sessionData);
     setAdminLoginEmail('');
     setAdminLoginPassword('');
-    writeAuditLog(`অ্যাডমিন লগইন: ${matchedAdmin.email}`, matchedAdmin.name);
+    writeAuditLog(`অ্যাডমিন লগইন: ${matchedAdmin.email} / ${matchedAdmin.phone}`, matchedAdmin.name);
     showToast(`${matchedAdmin.name} প্যানেলে স্বাগতম!`);
   } else {
-    setLoginError('ভুল অ্যাডমিন ইমেইল বা পাসওয়ার্ড।');
+    setLoginError('ভুল অ্যাডমিন ইমেইল/মোবাইল নম্বর বা পাসওয়ার্ড।');
   }
 };
 
@@ -1018,19 +1023,18 @@ export default function App() {
             ) : (
               <form onSubmit={handleAdminLogin} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                    অ্যাডমিন ইমেইল *
-                  </label>
-                  <input
-                    type="email"
-                    value={adminLoginEmail}
-                    onChange={(e) => setAdminLoginEmail(e.target.value)}
-                    placeholder="আপনার অ্যাডমিন ইমেইল"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-800 focus:border-slate-800 outline-none text-base"
-                    required
-                  />
-                </div>
-                <div>
+  <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+    অ্যাডমিন ইমেইল বা মোবাইল নম্বর *
+  </label>
+  <input
+    type="text"
+    value={adminLoginEmail}
+    onChange={(e) => setAdminLoginEmail(e.target.value)}
+    placeholder="ইমেইল বা 017XXXXXXXX দিন"
+    className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-800 focus:border-slate-800 outline-none text-base"
+    required
+  />
+</div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">
                     পাসওয়ার্ড *
                   </label>
