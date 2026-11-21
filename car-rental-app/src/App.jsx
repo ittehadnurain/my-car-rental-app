@@ -938,7 +938,7 @@ export default function App() {
               হাশেম কার রেন্টাল
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              মোবাইল ও কম্পিউটারের জন্য সহজ হিসাব প্যানেল
+              Develpoed by Ittehad Nur
             </p>
           </div>
 
