@@ -74,11 +74,7 @@ const DEFAULT_DRIVERS = [
   { id: 'DRV-102', name: 'রফিকুল ইসলাম', phone: '01811000002', carNumber: 'চট্ট মেট্রো-গ ১১-৭৮৯০', pin: '5678', active: true }
 ];
 
-const DEFAULT_STATIONS = [
-  { id: 'STN-1', name: 'মেঘনা সিএনজি ও ফিলিং স্টেশন', location: 'মহাখালী, ঢাকা' },
-  { id: 'STN-2', name: 'যমুনা ফিলিং স্টেশন', location: 'গাবতলী, ঢাকা' },
-  { id: 'STN-3', name: 'পদ্মা অয়েল ও গ্যাস পাম্প', location: 'জিইসি মোড়, চট্টগ্রাম' }
-];
+const DEFAULT_STATIONS = [];
 
 const DEFAULT_ADMIN_CREDS = {
   email: 'ittehadnurain2007@gmail.com',
