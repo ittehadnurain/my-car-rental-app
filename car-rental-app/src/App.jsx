@@ -944,7 +944,7 @@ export default function App() {
               হাশেম কার রেন্টাল
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Develpoed by Ittehad Nur
+              Developed by Ittehad Nur
             </p>
           </div>
 
