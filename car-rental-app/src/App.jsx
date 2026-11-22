@@ -683,8 +683,8 @@ export default function App() {
           ? `Assalamu Alaikum, I am ${currentUser.name} (${currentUser.driverId}).`
           : `আসসালামু আলাইকুম, আমি ${currentUser.name} (${currentUser.driverId})।`
         : lang === 'en'
-        ? 'Assalamu Alaikum, contacting from Hashem Car Rental.'
-        : 'আসসালামু আলাইকুম, হাশেম কার রেন্টাল থেকে যোগাযোগ করছি।';
+        ? 'Assalamu Alaikum, contacting from HK CAR RENTAL.'
+        : 'আসসালামু আলাইকুম, HK CAR RENTAL থেকে যোগাযোগ করছি।';
     return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(greetingText)}`;
   }, [currentUser, lang]);
 
