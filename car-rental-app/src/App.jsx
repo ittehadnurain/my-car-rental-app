@@ -27,7 +27,6 @@ import {
   X,
   CheckCircle2,
   Calendar,
-  Phone,
   ArrowRightLeft,
   ArrowRight,
   Lock,
@@ -56,7 +55,7 @@ const firebaseConfig = {
   appId: "1:483269161250:web:aa67a162afe8fc093fb57b"
 };
 
-// দেশের কোড (880) সহ আপনার WhatsApp নম্বর লিখুন (কোনো + বা space ছাড়া)
+// দেশের কোড (880) সহ আপনার WhatsApp নম্বর লিখুন (কোনো + বা space ছাড়া)
 const ADMIN_WHATSAPP_NUMBER = '8801877695700';
 
 // শুধুমাত্র ড্রাইভার আইডির হেডারের নিচে দেখানোর স্ক্রলিং সতর্কতা বার্তা
@@ -107,7 +106,6 @@ const TRANSLATIONS = {
     dropPlaceholder: 'যেমন: চট্টগ্রাম শহর',
     totalFareLabel: 'মোট ভাড়া (টাকা) *',
     totalFarePlaceholder: 'যেমন: ৫০০০',
-    passengerPhoneLabel: 'যাত্রীর মোবাইল নম্বর *',
     rentDateLabel: 'ভাড়ার তারিখ *',
     tripTypeLabel: 'ভাড়ার ধরন *',
     oneWay: 'শুধু যাওয়া',
@@ -120,7 +118,6 @@ const TRANSLATIONS = {
     saveRentBtn: 'ভাড়ার হিসাব সেভ করুন',
     yourRecentRents: 'আপনার সাম্প্রতিক ভাড়া',
     countSuffix: 'টি',
-    passengerPrefix: 'যাত্রী:',
     totalPrefix: 'মোট:',
     commissionPrefix: 'কমিশন:',
     noRentsYet: 'আপনার এখনো কোনো ভাড়ার এন্ট্রি নেই।',
@@ -141,7 +138,7 @@ const TRANSLATIONS = {
     yourGasList: 'আপনার গ্যাস খরচের তালিকা',
     receiptBtn: 'রিসিপ্ট',
     noGasYet: 'আপনার এখনো কোনো গ্যাস খরচের রেকর্ড নেই।',
-    summaryReportSub: '৭, ১০, ১৫, ৩০ দিন বা কাস্টম তারিখে হিসাব দেখুন (Unpaid শেষ হলে বাকি গ্যাস Paid ভাড়া থেকে কাটা হয়)',
+    summaryReportSub: '৭, ১০, ১৫, ৩০ দিন বা কাস্টম তারিখে হিসাব দেখুন (Unpaid শেষ হলে বাকি গ্যাস Paid ভাড়া থেকে কাটা হয়)',
     printPdfBtn: 'PDF / প্রিন্ট করুন',
     reportScopeLabel: 'রিপোর্টের আওতা',
     allDriversScope: 'সকল ড্রাইভার (সম্মিলিত)',
@@ -177,7 +174,6 @@ const TRANSLATIONS = {
     routeCol: 'যাত্রা → গন্তব্য',
     typeCol: 'ধরন',
     statusCol: 'স্ট্যাটাস',
-    passengerCol: 'যাত্রীর নম্বর',
     approvedGasDetailsTitle: 'অনুমোদিত গ্যাস খরচের বিস্তারিত',
     noGasInPeriod: 'এই সময়কালে কোনো অনুমোদিত গ্যাস খরচের তথ্য নেই।',
     stationCol: 'গ্যাস ফিলিং স্টেশন',
@@ -211,7 +207,7 @@ const TRANSLATIONS = {
     deleteBtn: 'ডিলিট',
     actionCol: 'অ্যাকশন',
     allGasAndApproval: 'সকল গ্যাস খরচ ও অনুমোদন',
-    gasApprovalNote: 'অ্যাডমিন Approve করলেই গ্যাস খরচ হিসেবে যুক্ত হবে (সব ভাড়া Paid থাকলে Paid ভাড়া থেকে সমন্বয় হবে)',
+    gasApprovalNote: 'অ্যাডমিন Approve করলেই গ্যাস খরচ হিসেবে যুক্ত হবে (সব ভাড়া Paid থাকলে Paid ভাড়া থেকে সমন্বয় হবে)',
     approveBtn: 'Approve করুন',
     rejectBtn: 'Reject করুন',
     paidBtn: 'Paid করুন',
@@ -287,7 +283,6 @@ const TRANSLATIONS = {
     dropPlaceholder: 'e.g. Chattogram City',
     totalFareLabel: 'Total Fare (BDT) *',
     totalFarePlaceholder: 'e.g. 5000',
-    passengerPhoneLabel: 'Passenger Mobile Number *',
     rentDateLabel: 'Rent Date *',
     tripTypeLabel: 'Trip Type *',
     oneWay: 'One-Way',
@@ -300,7 +295,6 @@ const TRANSLATIONS = {
     saveRentBtn: 'Save Rent Entry',
     yourRecentRents: 'Your Recent Rents',
     countSuffix: '',
-    passengerPrefix: 'Passenger:',
     totalPrefix: 'Total:',
     commissionPrefix: 'Commission:',
     noRentsYet: 'You have no rent entries yet.',
@@ -357,7 +351,6 @@ const TRANSLATIONS = {
     routeCol: 'Pickup → Drop-off',
     typeCol: 'Type',
     statusCol: 'Status',
-    passengerCol: 'Passenger Phone',
     approvedGasDetailsTitle: 'Approved Gas Expense Details',
     noGasInPeriod: 'No approved gas expenses found for this period.',
     stationCol: 'Gas Filling Station',
@@ -641,11 +634,10 @@ export default function App() {
 
   const [selectedDriverId, setSelectedDriverId] = useState('');
 
-  // Rent Form State
+  // Rent Form State (Passenger Phone removed)
   const [pickupLocation, setPickupLocation] = useState('');
   const [dropLocation, setDropLocation] = useState('');
   const [totalFare, setTotalFare] = useState('');
-  const [passengerPhone, setPassengerPhone] = useState('');
   const [rentDate, setRentDate] = useState(todayISO());
   const [tripType, setTripType] = useState('one-way');
   const [isSubmittingRent, setIsSubmittingRent] = useState(false);
@@ -951,13 +943,6 @@ export default function App() {
       );
       return;
     }
-    if (!passengerPhone.trim()) {
-      showToast(
-        lang === 'en' ? 'Enter passenger mobile number' : 'যাত্রীর মোবাইল নম্বর দিন',
-        'error'
-      );
-      return;
-    }
 
     setIsSubmittingRent(true);
     const driverObj = drivers.find((d) => d.id === targetDriverId);
@@ -970,7 +955,6 @@ export default function App() {
       totalFare: numericFare,
       driverCommission: calculatedCommission,
       remainingFare: calculatedRemainingFare,
-      passengerPhone: passengerPhone.trim(),
       rentDate,
       tripType,
       isPaid: false,
@@ -997,7 +981,6 @@ export default function App() {
       setPickupLocation('');
       setDropLocation('');
       setTotalFare('');
-      setPassengerPhone('');
       setTripType('one-way');
     } catch (error) {
       console.error(error);
@@ -1262,7 +1245,7 @@ export default function App() {
     }
   };
 
-  // Submit Gas Expense Entry (Always starts as 'pending' — only added to Gas Expenses after Admin approves)
+  // Submit Gas Expense Entry
   const handleGasSubmit = async (e) => {
     e.preventDefault();
     const targetDriverId = currentUser?.role === 'driver' ? currentUser.driverId : selectedDriverId;
@@ -1329,7 +1312,7 @@ export default function App() {
       showToast(
         lang === 'en'
           ? 'Gas expense saved as Pending. It will be added once Admin approves.'
-          : 'গ্যাস খরচ Pending অবস্থায় সেভ হয়েছে। অ্যাডমিন Approve করলে গ্যাস খরচে যুক্ত হবে।'
+          : 'গ্যাস খরচ Pending অবস্থায় সেভ হয়েছে। অ্যাডমিন Approve করলে গ্যাস খরচে যুক্ত হবে।'
       );
       setGasAmount('');
       setReceiptBase64('');
@@ -1359,7 +1342,6 @@ export default function App() {
       totalFare: fare,
       driverCommission: commission,
       remainingFare: remaining,
-      passengerPhone: editingRent.passengerPhone,
       rentDate: editingRent.rentDate,
       tripType: editingRent.tripType
     };
@@ -1849,7 +1831,7 @@ export default function App() {
       type="button"
       onClick={toggleLanguage}
       aria-label="Switch Language between Bangla and English"
-      title={lang === 'bn' ? 'Switch to English' : 'বাংলায় পরিবর্তন করুন'}
+      title={lang === 'bn' ? 'Switch to English' : 'বাংলায় পরিবর্তন করুন'}
       className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition shrink-0"
     >
       <Globe className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
@@ -2351,8 +2333,8 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 sm:gap-3.5 items-end">
-                  <div className="sm:col-span-2 min-w-0">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 items-end">
+                  <div className="min-w-0">
                     <label className="block text-sm font-semibold text-slate-700 mb-1">
                       {t.totalFareLabel}
                     </label>
@@ -2369,35 +2351,17 @@ export default function App() {
                     />
                   </div>
 
-                  <div className="sm:col-span-2 min-w-0">
+                  <div className="min-w-0">
                     <label className="block text-sm font-semibold text-slate-700 mb-1">
-                      {t.passengerPhoneLabel}
-                    </label>
-                    <div className="relative">
-                      <Phone className="w-4 h-4 text-slate-400 left-3.5 top-3.5 absolute" />
-                      <input
-                        type="tel"
-                        inputMode="tel"
-                        value={passengerPhone}
-                        onChange={(e) => setPassengerPhone(e.target.value)}
-                        placeholder="017XXXXXXXX"
-                        className="w-full pl-10 pr-3.5 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-base"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="sm:col-span-1 min-w-0">
-                    <label className="block text-xs font-semibold text-slate-700 mb-1 truncate">
                       {t.rentDateLabel}
                     </label>
                     <div className="relative">
-                      <Calendar className="w-3.5 h-3.5 text-slate-400 left-2.5 top-3.5 absolute pointer-events-none" />
+                      <Calendar className="w-4 h-4 text-slate-400 left-3.5 top-3.5 absolute pointer-events-none" />
                       <input
                         type="date"
                         value={rentDate}
                         onChange={(e) => setRentDate(e.target.value)}
-                        className="w-full min-w-0 pl-8 pr-2 py-2.5 sm:py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-xs sm:text-sm bg-white"
+                        className="w-full min-w-0 pl-10 pr-3.5 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-base bg-white"
                         required
                       />
                     </div>
@@ -2512,9 +2476,6 @@ export default function App() {
                       </div>
                       <div className="font-semibold text-sm text-slate-800">
                         {r.pickupLocation} → {r.dropLocation}
-                      </div>
-                      <div className="text-xs text-slate-500 mt-1">
-                        {t.passengerPrefix} {r.passengerPhone}
                       </div>
                       <div className="mt-2 pt-2 border-t border-slate-200/70 flex items-center justify-between text-xs">
                         <span>
@@ -3000,9 +2961,6 @@ export default function App() {
                         {t.driverCol}: {r.driverName || r.driverId}
                       </div>
                     )}
-                    <div className="text-slate-500">
-                      {t.passengerPrefix} {r.passengerPhone}
-                    </div>
                     <div className="pt-1.5 border-t border-slate-200 flex justify-between font-bold">
                       <span>
                         {t.totalPrefix} {formatBDT(r.totalFare)}
@@ -3029,7 +2987,6 @@ export default function App() {
                       <th className="py-2.5 px-3">{t.routeCol}</th>
                       <th className="py-2.5 px-3">{t.typeCol}</th>
                       <th className="py-2.5 px-3">{t.statusCol}</th>
-                      <th className="py-2.5 px-3">{t.passengerCol}</th>
                       <th className="py-2.5 px-3 text-right">{t.totalFareShort}</th>
                       <th className="py-2.5 px-3 text-right">{t.commission25}</th>
                       {isAdmin && <th className="py-2.5 px-3 text-right">{t.remainingFare}</th>}
@@ -3059,7 +3016,6 @@ export default function App() {
                             {r.isPaid ? 'Paid' : 'Unpaid'}
                           </span>
                         </td>
-                        <td className="py-2.5 px-3 whitespace-nowrap">{r.passengerPhone}</td>
                         <td className="py-2.5 px-3 text-right font-semibold">
                           {formatBDT(r.totalFare)}
                         </td>
@@ -3076,7 +3032,7 @@ export default function App() {
                     {filteredSummary.matchingRents.length === 0 && (
                       <tr>
                         <td
-                          colSpan={isAdmin && reportScope === 'all' ? 9 : 8}
+                          colSpan={isAdmin && reportScope === 'all' ? 8 : 7}
                           className="py-6 text-center text-slate-400"
                         >
                           {t.noRentInPeriod}
@@ -3551,9 +3507,6 @@ export default function App() {
                         <div className="font-bold text-sm text-slate-900">
                           {r.pickupLocation} → {r.dropLocation}
                         </div>
-                        <div className="text-slate-500">
-                          {t.passengerPrefix} {r.passengerPhone}
-                        </div>
                         <div className="flex justify-between pt-1.5 border-t border-slate-200 font-semibold">
                           <span>
                             {t.totalPrefix} {formatBDT(r.totalFare)}
@@ -3615,7 +3568,6 @@ export default function App() {
                         <th className="py-2.5 px-3">{t.driverCol}</th>
                         <th className="py-2.5 px-3">{t.routeCol}</th>
                         <th className="py-2.5 px-3">{t.statusCol}</th>
-                        <th className="py-2.5 px-3">{t.passengerCol}</th>
                         <th className="py-2.5 px-3 text-right">{t.totalFareShort}</th>
                         <th className="py-2.5 px-3 text-right">{t.commission25}</th>
                         <th className="py-2.5 px-3 text-right">{t.remainingFare}</th>
@@ -3658,7 +3610,6 @@ export default function App() {
                                 {r.isPaid ? 'Paid' : 'Unpaid'}
                               </button>
                             </td>
-                            <td className="py-2.5 px-3 whitespace-nowrap">{r.passengerPhone}</td>
                             <td className="py-2.5 px-3 text-right font-bold">
                               {formatBDT(r.totalFare)}
                             </td>
@@ -3691,7 +3642,7 @@ export default function App() {
                       })}
                       {rents.length === 0 && (
                         <tr>
-                          <td colSpan={10} className="py-8 text-center text-slate-400">
+                          <td colSpan={9} className="py-8 text-center text-slate-400">
                             {t.noRentInPeriod}
                           </td>
                         </tr>
@@ -4488,34 +4439,18 @@ export default function App() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">
-                  {t.passengerCol}
-                </label>
-                <input
-                  type="text"
-                  value={editingRent.passengerPhone}
-                  onChange={(e) =>
-                    setEditingRent({ ...editingRent, passengerPhone: e.target.value })
-                  }
-                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">
-                  {t.tripTypeLabel.replace(' *', '')}
-                </label>
-                <select
-                  value={editingRent.tripType}
-                  onChange={(e) => setEditingRent({ ...editingRent, tripType: e.target.value })}
-                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white"
-                >
-                  <option value="one-way">{t.oneWay}</option>
-                  <option value="round-trip">{t.roundTrip}</option>
-                </select>
-              </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1">
+                {t.tripTypeLabel.replace(' *', '')}
+              </label>
+              <select
+                value={editingRent.tripType}
+                onChange={(e) => setEditingRent({ ...editingRent, tripType: e.target.value })}
+                className="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white"
+              >
+                <option value="one-way">{t.oneWay}</option>
+                <option value="round-trip">{t.roundTrip}</option>
+              </select>
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
