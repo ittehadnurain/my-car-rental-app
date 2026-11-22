@@ -246,7 +246,7 @@ const TRANSLATIONS = {
     saveBtn: 'সংরক্ষণ করুন'
   },
   en: {
-    brandName: 'Hashem Car Rental',
+    brandName: 'HK Car Rental',
     developedBy: 'Developed by Ittehad Nur',
     driverLogin: 'Driver Login',
     adminLogin: 'Admin Login',
