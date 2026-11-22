@@ -69,7 +69,7 @@ const DRIVER_SAFETY_SCROLL_TEXT = {
 // ==========================================
 const TRANSLATIONS = {
   bn: {
-    brandName: 'হাশেম কার রেন্টাল',
+    brandName: 'HK CAR RENTAL',
     developedBy: 'Developed by Ittehad Nur',
     driverLogin: 'ড্রাইভার লগইন',
     adminLogin: 'অ্যাডমিন লগইন',
